@@ -56,11 +56,10 @@ export default function HomePage() {
         </nav>
         <div className="cinema-actions">
           <label className="cinema-search"><Search size={16} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm phim..." aria-label="Tìm phim" /></label>
-          <a className="cinema-login" href="/login">Đăng nhập</a>
           <button className="cinema-menu-button" onClick={() => setMenuOpen((value) => !value)} aria-label="Mở menu">{menuOpen ? <X size={20} /> : <Menu size={20} />}</button>
         </div>
       </header>
-      {menuOpen && <nav className="cinema-mobile-menu"><a href="#home" onClick={() => setMenuOpen(false)}>Trang chủ</a><a href="#new" onClick={() => setMenuOpen(false)}>Phim mới</a><a href="#genres" onClick={() => setMenuOpen(false)}>Thể loại</a><a href="#catalog" onClick={() => setMenuOpen(false)}>Danh sách phim</a><a href="/login">Đăng nhập</a></nav>}
+      {menuOpen && <nav className="cinema-mobile-menu"><a href="#home" onClick={() => setMenuOpen(false)}>Trang chủ</a><a href="#new" onClick={() => setMenuOpen(false)}>Phim mới</a><a href="#genres" onClick={() => setMenuOpen(false)}>Thể loại</a><a href="#catalog" onClick={() => setMenuOpen(false)}>Danh sách phim</a></nav>}
 
       <section className="cinema-hero" id="home">
         <div className="hero-backdrop hero-cosmos" />
@@ -106,9 +105,9 @@ export default function HomePage() {
 
       <section className="cinema-callout"><div className="callout-icon"><Clapperboard size={23} /></div><div><span className="section-overline">YOUR NEXT WATCH</span><h2>Một thế giới phim đang chờ bạn.</h2><p>CineWave đang được xây dựng từng bước. Các tính năng xem phim sẽ chỉ mở khi nguồn nội dung hợp pháp sẵn sàng.</p></div><a href="#catalog">Khám phá phim <ArrowRight size={15} /></a></section>
 
-      <footer className="cinema-footer"><a className="cinema-brand" href="#home"><span className="brand-mark"><Clapperboard size={18} /></span><span>Cine<span>Wave</span><i>.</i></span></a><p>© 2026 CineWave. Nền tảng khám phá điện ảnh đang trong giai đoạn phát triển.</p><div><a href="#home">Trang chủ</a><a href="#catalog">Thư viện</a><a href="/login">Tài khoản</a></div></footer>
+      <footer className="cinema-footer"><a className="cinema-brand" href="#home"><span className="brand-mark"><Clapperboard size={18} /></span><span>Cine<span>Wave</span><i>.</i></span></a><p>© 2026 CineWave. Nền tảng khám phá điện ảnh đang trong giai đoạn phát triển.</p><div><a href="#home">Trang chủ</a><a href="#catalog">Thư viện</a></div></footer>
 
-      <nav className="cinema-bottom-nav"><a className="current" href="#home"><Film size={18} /><span>Khám phá</span></a><a href="#new"><Sparkles size={18} /><span>Phim mới</span></a><a href="#genres"><Clapperboard size={18} /><span>Thể loại</span></a><a href="/login"><Bookmark size={18} /><span>Đã lưu</span></a></nav>
+      <nav className="cinema-bottom-nav"><a className="current" href="#home"><Film size={18} /><span>Khám phá</span></a><a href="#new"><Sparkles size={18} /><span>Phim mới</span></a><a href="#genres"><Clapperboard size={18} /><span>Thể loại</span></a><a href="#catalog"><Bookmark size={18} /><span>Thư viện</span></a></nav>
 
       {selected && <div className="movie-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelected(null); }}><section className="movie-modal" role="dialog" aria-modal="true" aria-label={"Thông tin phim " + selected.title}><button className="modal-close" onClick={() => setSelected(null)} aria-label="Đóng"><X size={19} /></button><div className={"modal-art poster-" + selected.tone}><span className="poster-symbol">✦</span><span className="poster-brand">CINEWAVE / FEATURE</span></div><div className="modal-copy"><span className="section-overline">MOVIE PREVIEW</span><h2>{selected.title}</h2><div className="hero-meta"><span>{selected.year}</span><span>·</span><span>{selected.genre}</span><span>·</span><span>{selected.duration}</span><span className="age-tag">{selected.rating}</span></div><p>{selected.description}</p><div className="modal-notice"><Clock3 size={16} /> Thông tin mẫu. Trang chi tiết và trình phát sẽ được triển khai ở giai đoạn tiếp theo.</div><button className="primary-play" onClick={() => toggleSaved(selected.id)}>{saved.includes(selected.id) ? <Check size={16} /> : <Bookmark size={16} />} {saved.includes(selected.id) ? "Đã lưu vào danh sách" : "Lưu phim yêu thích"}</button></div></section></div>}
     </main>
