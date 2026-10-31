@@ -22,7 +22,8 @@ This folder contains the first PostgreSQL schema for GameHub Shop.
 
 - Anonymous visitors can only read active products.
 - Authenticated customers can read only their own orders, order lines, payment records and wallet records.
-- Only allow-listed admins can manage catalog and operational records.
+- Only allow-listed admins can manage catalog and operational records. The admin-check helper lives in the non-exposed `private` schema.
+- Explicit Data API grants are included because current Supabase projects no longer automatically expose newly created public tables; RLS remains the row-level boundary.
 - Browser clients cannot insert orders, confirm payments, credit/debit wallets or write wallet ledger entries.
 - Future order creation and payment processing must use server-side authorization, authoritative product prices, provider signature verification and idempotency.
 
