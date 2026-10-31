@@ -14,14 +14,14 @@ create table if not exists public.users (
   created_at timestamptz not null default now()
 );
 create table if not exists public.accounts (
-  id bigserial primary key,
+  id serial primary key,
   "userId" text not null references public.users(id) on delete cascade,
   type text not null,
   provider text not null,
   "providerAccountId" text not null,
   refresh_token text,
   access_token text,
-  expires_at bigint,
+  expires_at integer,
   token_type text,
   scope text,
   id_token text,
@@ -29,7 +29,7 @@ create table if not exists public.accounts (
   unique (provider, "providerAccountId")
 );
 create table if not exists public.sessions (
-  id bigserial primary key,
+  id serial primary key,
   "userId" text not null references public.users(id) on delete cascade,
   expires timestamptz not null,
   "sessionToken" text not null unique
