@@ -31,7 +31,22 @@ function isStoredOrder(value: unknown): value is StoredOrder {
     typeof order.playerId === "string" &&
     (order.payment === "bank" || order.payment === "wallet") &&
     typeof order.total === "number" &&
-    Array.isArray(order.items);
+    Number.isFinite(order.total) &&
+    order.total >= 0 &&
+    Number.isFinite(Date.parse(order.createdAt)) &&
+    Array.isArray(order.items) &&
+    order.items.every((item) =>
+      !!item &&
+      typeof item.id === "string" &&
+      typeof item.name === "string" &&
+      typeof item.game === "string" &&
+      typeof item.quantity === "number" &&
+      Number.isInteger(item.quantity) &&
+      item.quantity > 0 &&
+      typeof item.unitPrice === "number" &&
+      Number.isFinite(item.unitPrice) &&
+      item.unitPrice >= 0
+    );
 }
 
 export default function OrdersPage() {
