@@ -1,100 +1,164 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { ArrowRight, BadgeCheck, ChevronDown, Gamepad2, Headphones, Menu, Search, ShieldCheck, ShoppingBag, Sparkles, X, Zap } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
-type Category = "Tất cả" | "Liên Quân" | "Free Fire" | "PUBG Mobile";
-type Product = { id: number; name: string; game: Exclude<Category, "Tất cả">; type: string; price: number; oldPrice?: number; tag?: string; icon: string; tone: string; description: string };
+type Category = "Tất cả" | "Liên Quân" | "Free Fire" | "PUBG Mobile" | "Tài khoản" | "Vật phẩm";
+type Product = {
+  id: string;
+  game: Exclude<Category, "Tất cả" | "Tài khoản" | "Vật phẩm">;
+  category: "Nạp game" | "Tài khoản" | "Vật phẩm";
+  name: string;
+  description: string;
+  price: number;
+  oldPrice?: number;
+  tag?: string;
+  icon: string;
+  tone: string;
+};
 
 const products: Product[] = [
-  { id: 1, name: "Gói Quân Huy  Quà tặng", game: "Liên Quân", type: "Nạp game", price: 49000, oldPrice: 59000, tag: "Phổ biến", icon: "💎", tone: "violet", description: "Gói Quân Huy dành cho tài khoản Liên Quân Mobile." },
-  { id: 2, name: "Gói Quân Huy  Cao cấp", game: "Liên Quân", type: "Nạp game", price: 99000, icon: "👑", tone: "gold", description: "Gói nạp cao cấp, xử lý sau khi xác nhận thanh toán." },
-  { id: 3, name: "Kim cương Free Fire", game: "Free Fire", type: "Nạp game", price: 25000, oldPrice: 30000, tag: "Giá tốt", icon: "💠", tone: "blue", description: "Kim cương cho Free Fire. Chọn gói phù hợp trước khi đặt." },
-  { id: 4, name: "Thẻ vô cực Free Fire", game: "Free Fire", type: "Vật phẩm", price: 79000, icon: "🔥", tone: "orange", description: "Dịch vụ hỗ trợ mua thẻ theo mùa, tùy tình trạng phát hành." },
-  { id: 5, name: "PUBG Mobile UC", game: "PUBG Mobile", type: "Nạp game", price: 55000, oldPrice: 65000, tag: "Bán chạy", icon: "🎯", tone: "yellow", description: "UC cho PUBG Mobile. Kiểm tra khu vực máy chủ trước khi đặt." },
-  { id: 6, name: "Gói UC chiến binh", game: "PUBG Mobile", type: "Nạp game", price: 109000, icon: "🪖", tone: "green", description: "Gói UC dành cho người chơi PUBG Mobile." },
-  { id: 7, name: "Tư vấn hồ sơ game", game: "Liên Quân", type: "Dịch vụ", price: 30000, icon: "🛡️", tone: "pink", description: "Tư vấn bảo mật và tối ưu hồ sơ; không yêu cầu mật khẩu." },
-  { id: 8, name: "Tư vấn setup PUBG", game: "PUBG Mobile", type: "Dịch vụ", price: 35000, icon: "⚡", tone: "cyan", description: "Tư vấn thiết lập điều khiển và độ nhạy theo thiết bị." }
+  { id: "lq-1", game: "Liên Quân", category: "Nạp game", name: "Quân Huy  Quà tặng", description: "Gói nạp mẫu • giao dịch qua kênh chính thức", price: 20000, oldPrice: 25000, tag: "Phổ biến", icon: "⚔️", tone: "violet" },
+  { id: "lq-2", game: "Liên Quân", category: "Vật phẩm", name: "Voucher vật phẩm", description: "Mã ưu đãi mẫu cho sự kiện trong game", price: 49000, tag: "Ưu đãi", icon: "💎", tone: "blue" },
+  { id: "ff-1", game: "Free Fire", category: "Nạp game", name: "Kim Cương — Gói cơ bản", description: "Gói nạp mẫu • cần xác nhận máy chủ", price: 50000, oldPrice: 60000, tag: "Bán chạy", icon: "💠", tone: "orange" },
+  { id: "ff-2", game: "Free Fire", category: "Vật phẩm", name: "Thẻ sự kiện Free Fire", description: "Sản phẩm minh họa, chờ cấu hình nhà cung cấp", price: 79000, icon: "🎟️", tone: "pink" },
+  { id: "pubg-1", game: "PUBG Mobile", category: "Nạp game", name: "UC — Gói khởi đầu", description: "Gói nạp mẫu • giao dịch qua kênh chính thức", price: 59000, oldPrice: 69000, tag: "Mới", icon: "🪖", tone: "gold" },
+  { id: "pubg-2", game: "PUBG Mobile", category: "Vật phẩm", name: "Hộp vật phẩm sự kiện", description: "Sản phẩm minh họa, chưa mở bán", price: 99000, icon: "🎁", tone: "green" },
+  { id: "acc-1", game: "Liên Quân", category: "Tài khoản", name: "Khu vực tài khoản Liên Quân", description: "Chỉ đăng tin khi có quyền chuyển nhượng hợp lệ", price: 0, tag: "Sắp ra mắt", icon: "🛡️", tone: "violet" },
+  { id: "acc-2", game: "Free Fire", category: "Tài khoản", name: "Khu vực tài khoản Free Fire", description: "Chỉ đăng tin khi đáp ứng điều khoản nhà phát hành", price: 0, tag: "Sắp ra mắt", icon: "🎮", tone: "orange" }
 ];
 
-const money = (value: number) => new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 }).format(value);
+type StoredOrder = { id: string; createdAt: string; playerId: string; payment: "bank" | "wallet"; total: number; items: { id: string; name: string; game: string; quantity: number; unitPrice: number }[]; };
 
-export default function Home() {
+const CART_STORAGE_KEY = "gamehub.cart.v1";
+const ORDERS_STORAGE_KEY = "gamehub.orders.v1";
+const categories: Category[] = ["Tất cả", "Liên Quân", "Free Fire", "PUBG Mobile", "Tài khoản", "Vật phẩm"];
+const money = (value: number) => new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(value);
+
+export default function HomePage() {
   const [category, setCategory] = useState<Category>("Tất cả");
   const [query, setQuery] = useState("");
-  const [cart, setCart] = useState<Record<number, number>>({});
+  const [cart, setCart] = useState<Record<string, number>>({});
+  const [cartReady, setCartReady] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(CART_STORAGE_KEY);
+      if (saved) {
+        const parsed: unknown = JSON.parse(saved);
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          const safeCart = Object.fromEntries(Object.entries(parsed).filter(([id, quantity]) => products.some((product) => product.id === id) && typeof quantity === "number" && Number.isInteger(quantity) && quantity > 0 && quantity <= 99)) as Record<string, number>;
+          setCart(safeCart);
+        }
+      }
+    } catch {
+      setCart({});
+    } finally {
+      setCartReady(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (cartReady) {
+      try {
+        window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+      } catch {
+        setNotice("Lưu trữ trình duyệt không khả dụng; giỏ hàng sẽ không được giữ sau khi tải lại trang.");
+      }
+    }
+  }, [cart, cartReady]);
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [customer, setCustomer] = useState({ name: "", contact: "", playerId: "", note: "" });
+  const [payment, setPayment] = useState<"bank" | "wallet">("bank");
+  const [playerId, setPlayerId] = useState("");
   const [notice, setNotice] = useState("");
 
-  const visibleProducts = useMemo(() => products.filter((p) => (category === "Tất cả" || p.game === category) && (p.name.toLowerCase().includes(query.toLowerCase()) || p.game.toLowerCase().includes(query.toLowerCase()))), [category, query]);
-  const count = Object.values(cart).reduce((sum, n) => sum + n, 0);
-  const total = products.reduce((sum, p) => sum + p.price * (cart[p.id] || 0), 0);
-  const add = (id: number) => { setCart((old) => ({ ...old, [id]: (old[id] || 0) + 1 })); setNotice("Đã thêm sản phẩm vào giỏ hàng."); window.setTimeout(() => setNotice(""), 2200); };
-  const categories: Category[] = ["Tất cả", "Liên Quân", "Free Fire", "PUBG Mobile"];
+  const visibleProducts = useMemo(() => products.filter((product) => {
+    const matchesCategory = category === "Tất cả" || product.game === category || product.category === category;
+    const matchesQuery = `${product.name} ${product.game} ${product.description}`.toLowerCase().includes(query.toLowerCase());
+    return matchesCategory && matchesQuery;
+  }), [category, query]);
 
-  function submitOrder(e: React.FormEvent) {
-    e.preventDefault();
-    if (!customer.name.trim() || !customer.contact.trim()) return;
-    const order = { code: "VGS-" + Date.now().toString().slice(-7), customer, items: products.filter(p => cart[p.id]).map(p => ({ name: p.name, quantity: cart[p.id], price: p.price })), total, status: "Chờ xác nhận — bản MVP demo" };
-    const previous = JSON.parse(localStorage.getItem("velclaw-demo-orders") || "[]");
-    localStorage.setItem("velclaw-demo-orders", JSON.stringify([order, ...previous]));
-    setCart({});
-    setCheckoutOpen(false);
-    setCartOpen(false);
-    setNotice("Đã tạo đơn demo " + order.code + ". Chưa có giao dịch tiền thật.");
-    window.setTimeout(() => setNotice(""), 5000);
+  const cartItems = products.filter((product) => cart[product.id] > 0);
+  const count = Object.values(cart).reduce((sum, quantity) => sum + quantity, 0);
+  const total = cartItems.reduce((sum, product) => sum + product.price * cart[product.id], 0);
+
+  function addToCart(product: Product) {
+    if (product.price <= 0) {
+      setNotice("Danh mục tài khoản đang ở chế độ giới thiệu, chưa nhận giao dịch.");
+      return;
+    }
+    setCart((current) => ({ ...current, [product.id]: (current[product.id] ?? 0) + 1 }));
+    setNotice(`Đã thêm ${product.name} vào giỏ hàng.`);
+  }
+
+  function changeQuantity(id: string, delta: number) {
+    setCart((current) => {
+      const next = { ...current, [id]: Math.max(0, (current[id] ?? 0) + delta) };
+      if (next[id] === 0) delete next[id];
+      return next;
+    });
+  }
+
+  function submitDemoOrder() {
+    if (!playerId.trim()) {
+      setNotice("Vui lòng nhập ID nhân vật / thông tin nhận hàng cần thiết.");
+      return;
+    }
+    const order: StoredOrder = {
+      id: "GH-" + Date.now().toString(36).toUpperCase(),
+      createdAt: new Date().toISOString(),
+      playerId: playerId.trim(),
+      payment,
+      total,
+      items: cartItems.map((product) => ({ id: product.id, name: product.name, game: product.game, quantity: cart[product.id], unitPrice: product.price }))
+    };
+    try {
+      const savedOrders = window.localStorage.getItem(ORDERS_STORAGE_KEY);
+      const parsedOrders: unknown = savedOrders ? JSON.parse(savedOrders) : [];
+      const safeOrders = Array.isArray(parsedOrders) ? parsedOrders : [];
+      window.localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify([order, ...safeOrders].slice(0, 50)));
+      setCart({});
+      window.localStorage.removeItem(CART_STORAGE_KEY);
+      setCheckoutOpen(false);
+      setCartOpen(false);
+      setNotice("Đã lưu đơn demo " + order.id + " trên thiết bị này. Chưa có thanh toán hoặc giao hàng thật.");
+    } catch {
+      setNotice("Không thể lưu đơn trên trình duyệt. Hãy kiểm tra dung lượng lưu trữ rồi thử lại.");
+    }
   }
 
   return (
     <main>
-      <div className="announcement"><Sparkles size={13}/> Ưu đãi khai trương · Giao dịch minh bạch, hỗ trợ mỗi ngày <span>Chi tiết <ArrowRight size={12}/></span></div>
-      <header className="header">
-        <a className="brand" href="#"><span className="brand-mark"><Gamepad2 size={22}/></span><span>VELCLAW<span className="brand-light"> GAME SHOP</span></span></a>
-        <nav className={mobileOpen ? "nav nav-open" : "nav"}>
-          <a href="#games" onClick={() => setMobileOpen(false)}>Danh mục</a><a href="#products" onClick={() => setMobileOpen(false)}>Cửa hàng</a><a href="#how" onClick={() => setMobileOpen(false)}>Hướng dẫn</a>
-        </nav>
-        <div className="header-actions">
-          <button className="icon-btn search-toggle" aria-label="Tìm kiếm" onClick={() => document.getElementById("search")?.focus()}><Search size={19}/></button>
-          <button className="cart-btn" onClick={() => setCartOpen(true)}><ShoppingBag size={17}/> <span>Giỏ hàng</span><b>{count}</b></button>
-          <button className="icon-btn mobile-menu" aria-label="Mở menu" onClick={() => setMobileOpen(!mobileOpen)}>{mobileOpen ? <X/> : <Menu/>}</button>
-        </div>
+      <div className="announcement"><span className="pulse" /> GAMEHUB STORE <span className="announcement-divider">/</span> Nền tảng mua sắm game đang trong giai đoạn MVP</div>
+      <header className="topbar">
+        <a className="brand" href="#" aria-label="GameHub trang chủ"><span className="brand-mark">G</span><span>GAME<span className="brand-accent">HUB</span><small>GAME DIGITAL MARKET</small></span></a>
+        <nav className="desktop-nav" aria-label="Điều hướng chính"><a className="active" href="#store">Cửa hàng</a><a href="#games">Trò chơi</a><a href="#how">Hướng dẫn</a><a href="/orders">Đơn hàng</a></nav>
+        <div className="top-actions"><span className="secure-label">✦ Giao dịch an toàn</span><button className="cart-button" onClick={() => setCartOpen(true)} aria-label={`Mở giỏ hàng, ${count} sản phẩm`}>Giỏ hàng <span>{count}</span></button></div>
       </header>
 
-      <section className="hero">
-        <div className="hero-copy">
-          <div className="eyebrow"><span className="pulse"/> DIGITAL GAME STORE <span className="eyebrow-line"/></div>
-          <h1>Nâng cấp cuộc chơi.<br/><em>Chạm đỉnh</em> đam mê.</h1>
-          <p>Điểm đến cho game thủ Liên Quân, Free Fire và PUBG Mobile. Chọn dịch vụ phù hợp, đặt hàng nhanh và theo dõi trạng thái rõ ràng.</p>
-          <div className="hero-actions"><a className="primary-btn" href="#products">Khám phá cửa hàng <ArrowRight size={17}/></a><a className="text-link" href="#how">Cách thức hoạt động <span>↗</span></a></div>
-          <div className="hero-proof"><div className="proof-avatars"><span>🎮</span><span>⚔️</span><span>🔥</span></div><div><b>Game thủ là ưu tiên</b><small>Hỗ trợ đơn hàng minh bạch</small></div><div className="proof-divider"/><div><b>3 tựa game</b><small>Một điểm đến</small></div></div>
-        </div>
-        <div className="hero-art"><div className="art-glow"/><div className="orbit orbit-one"/><div className="orbit orbit-two"/><div className="hero-card card-top"><span>✦</span><div><small>GAME ON</small><b>READY PLAYER</b></div></div><div className="hero-emblem"><Gamepad2 size={78} strokeWidth={1.2}/><span>LEVEL UP</span></div><div className="hero-card card-bottom"><Zap size={17}/><div><small>YOUR NEXT</small><b>VICTORY STARTS HERE</b></div></div><div className="float-chip chip-one">⚔️ <span>Liên Quân</span></div><div className="float-chip chip-two">🔥 <span>Free Fire</span></div><div className="float-chip chip-three">🎯 <span>PUBG Mobile</span></div></div>
+      <section className="hero" id="games">
+        <div className="hero-copy"><div className="eyebrow"><span /> DIGITAL GAME MARKETPLACE</div><h1>Nâng cấp cuộc chơi.<br /><em>Chạm đỉnh</em> đam mê.</h1><p>Một điểm đến cho Liên Quân, Free Fire và PUBG Mobile. Khám phá gói nạp, vật phẩm và các dịch vụ game.</p><div className="hero-actions"><a className="primary-button" href="#store">Khám phá cửa hàng <span>↗</span></a><a className="text-link" href="#how">Cách mua hàng <span>→</span></a></div><div className="hero-stats"><div><strong>03</strong><span>TRÒ CHƠI</span></div><i /><div><strong>24/7</strong><span>TRUY CẬP</span></div><i /><div><strong>100%</strong><span>MINH BẠCH</span></div></div></div>
+        <div className="hero-art" aria-label="Minh họa game"><div className="orbit orbit-one" /><div className="orbit orbit-two" /><div className="hero-glow" /><div className="hero-emblem">✦</div><div className="floating-card card-top"><span>✧</span><div><b>GAME ON</b><small>YOUR NEXT LEVEL</small></div></div><div className="floating-card card-bottom"><span>⚡</span><div><b>TOP UP</b><small>POWER YOUR GAME</small></div></div><div className="hero-game-icons"><span>⚔️</span><span>🔥</span><span>🪖</span></div><div className="hero-caption">PLAY <b>WITHOUT LIMITS</b></div></div>
       </section>
 
-      <section className="trust-strip"><div><ShieldCheck/><span><b>Minh bạch</b><small>Thông tin đơn rõ ràng</small></span></div><div><Zap/><span><b>Tiện lợi</b><small>Đặt hàng nhanh chóng</small></span></div><div><Headphones/><span><b>Hỗ trợ</b><small>Đồng hành cùng game thủ</small></span></div><div><BadgeCheck/><span><b>An toàn</b><small>Không thu thập mật khẩu game</small></span></div></section>
+      <section className="trust-strip"><div><span>◈</span><p><b>Danh mục rõ ràng</b><small>Thông tin sản phẩm minh bạch</small></p></div><div><span>⌁</span><p><b>Thanh toán linh hoạt</b><small>QR ngân hàng & ví nội bộ</small></p></div><div><span>◎</span><p><b>Hỗ trợ người chơi</b><small>Quy trình đặt hàng dễ hiểu</small></p></div></section>
 
-      <section className="section games-section" id="games"><div className="section-heading"><div><div className="eyebrow">CHỌN CHIẾN TRƯỜNG</div><h2>Game bạn đang chơi?</h2></div><p>Chọn tựa game để khám phá<br/>các sản phẩm và dịch vụ.</p></div><div className="game-grid">
-        <button className="game-tile lienquan" onClick={() => {setCategory("Liên Quân"); document.getElementById("products")?.scrollIntoView({behavior:"smooth"});}}><div className="game-symbol">⚔️</div><div><small>MOBILE MOBA</small><h3>Liên Quân</h3><span>Khám phá sản phẩm <ArrowRight size={14}/></span></div><b className="tile-number">01</b></button>
-        <button className="game-tile freefire" onClick={() => {setCategory("Free Fire"); document.getElementById("products")?.scrollIntoView({behavior:"smooth"});}}><div className="game-symbol">🔥</div><div><small>BATTLE ROYALE</small><h3>Free Fire</h3><span>Khám phá sản phẩm <ArrowRight size={14}/></span></div><b className="tile-number">02</b></button>
-        <button className="game-tile pubg" onClick={() => {setCategory("PUBG Mobile"); document.getElementById("products")?.scrollIntoView({behavior:"smooth"});}}><div className="game-symbol">🎯</div><div><small>BATTLE ROYALE</small><h3>PUBG Mobile</h3><span>Khám phá sản phẩm <ArrowRight size={14}/></span></div><b className="tile-number">03</b></button>
-      </div></section>
-
-      <section className="section products-section" id="products"><div className="section-heading"><div><div className="eyebrow">THE PLAYER'S CHOICE</div><h2>Sản phẩm nổi bật<span className="accent-dot">.</span></h2></div><div className="product-tools"><div className="search-box"><Search size={16}/><input id="search" value={query} onChange={e => setQuery(e.target.value)} placeholder="Tìm sản phẩm..."/></div></div></div>
-        <div className="filters">{categories.map(c => <button key={c} className={category === c ? "filter active" : "filter"} onClick={() => setCategory(c)}>{c}</button>)}</div>
-        <div className="product-grid">{visibleProducts.map(p => <article className="product-card" key={p.id}><div className={"product-visual "+p.tone}><span className="product-tag">{p.tag || p.type}</span><span className="product-emoji">{p.icon}</span><span className="visual-game">{p.game}</span></div><div className="product-info"><div className="product-meta"><span>{p.game}</span><span>{p.type}</span></div><h3>{p.name}</h3><p>{p.description}</p><div className="product-bottom"><div><b>{money(p.price)}</b>{p.oldPrice && <del>{money(p.oldPrice)}</del>}</div><button aria-label={"Thêm "+p.name+" vào giỏ"} onClick={() => add(p.id)}><ShoppingBag size={16}/></button></div></div></article>)}</div>
-        {visibleProducts.length === 0 && <div className="empty-state">Không tìm thấy sản phẩm phù hợp.</div>}
+      <section className="store-section" id="store">
+        <div className="section-heading"><div><div className="eyebrow">CHỌN THỨ BẠN CẦN</div><h2>Khám phá <em>cửa hàng</em></h2><p>Tìm sản phẩm phù hợp với tựa game bạn yêu thích.</p></div><div className="catalog-count"><b>{visibleProducts.length.toString().padStart(2, "0")}</b><span>SẢN PHẨM</span></div></div>
+        <div className="store-toolbar"><div className="category-tabs" role="tablist" aria-label="Lọc danh mục">{categories.map((item) => <button key={item} role="tab" aria-selected={category === item} className={category === item ? "selected" : ""} onClick={() => setCategory(item)}>{item}</button>)}</div><label className="search-box"><span>⌕</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm game, sản phẩm..." aria-label="Tìm sản phẩm" /><kbd>⌘ K</kbd></label></div>
+        <div className="product-grid">{visibleProducts.map((product) => <article className="product-card" key={product.id}><div className={`product-visual ${product.tone}`}><div className="visual-grid" /><span className="product-icon">{product.icon}</span><span className="game-chip">{product.game}</span>{product.tag && <span className="product-tag">{product.tag}</span>}<span className="visual-index">GH / {product.id.toUpperCase()}</span></div><div className="product-info"><div className="product-type">{product.category.toUpperCase()}</div><h3>{product.name}</h3><p>{product.description}</p><div className="product-bottom"><div>{product.price > 0 ? <><strong>{money(product.price)}</strong>{product.oldPrice && <del>{money(product.oldPrice)}</del>}</> : <strong className="coming-soon">Sắp mở bán</strong>}</div><button className="add-button" onClick={() => addToCart(product)} aria-label={`Thêm ${product.name} vào giỏ`}>{product.price > 0 ? "+" : "↗"}</button></div></div></article>)}</div>
+        {visibleProducts.length === 0 && <div className="empty-state"><span>⌕</span><h3>Không tìm thấy sản phẩm</h3><p>Thử từ khóa khác hoặc chọn danh mục khác.</p><button onClick={() => { setQuery(""); setCategory("Tất cả"); }}>Xóa bộ lọc</button></div>}
       </section>
 
-      <section className="how-section" id="how"><div className="section"><div className="section-heading"><div><div className="eyebrow">ĐƠN GIẢN TRONG 3 BƯỚC</div><h2>Mua sắm dễ dàng.</h2></div><p>Quy trình rõ ràng, chủ động<br/>theo dõi từng bước.</p></div><div className="steps"><div><span>01</span><h3>Chọn sản phẩm</h3><p>Tìm tựa game và dịch vụ bạn cần.</p></div><div><span>02</span><h3>Gửi thông tin</h3><p>Nhập thông tin liên hệ và Player ID khi cần.</p></div><div><span>03</span><h3>Xác nhận đơn</h3><p>Đội ngũ xác nhận và cập nhật trạng thái đơn.</p></div></div></div></section>
+      <section className="feature-banner" id="how"><div><div className="eyebrow">SẴN SÀNG CHIẾN ĐẤU?</div><h2>Cuộc chơi của bạn.<br /><em>Luật chơi của bạn.</em></h2><p>Chọn game, tìm sản phẩm, thêm vào giỏ và xem trước quy trình thanh toán. Bản MVP chưa xử lý giao dịch thật.</p><a href="#store" className="primary-button">Bắt đầu mua sắm <span>↗</span></a></div><div className="banner-symbol">GH<span>✦</span></div></section>
 
-      <footer><a className="brand" href="#"><span className="brand-mark"><Gamepad2 size={20}/></span><span>VELCLAW<span className="brand-light"> GAME SHOP</span></span></a><p>© 2026 VelClaw Game Shop. Nền tảng cửa hàng game độc lập.</p><span className="footer-note">Không liên kết hoặc được bảo trợ bởi các nhà phát hành game.</span></footer>
+      <footer><a className="brand footer-brand" href="#"><span className="brand-mark">G</span><span>GAME<span className="brand-accent">HUB</span><small>GAME DIGITAL MARKET</small></span></a><p>© 2026 GameHub. Nền tảng độc lập, không liên kết chính thức với các nhà phát hành game.</p><span className="footer-status"><i /> MVP PREVIEW</span></footer>
 
-      {notice && <div className="toast">{notice}</div>}
-      {cartOpen && <div className="overlay" onMouseDown={e => {if(e.target === e.currentTarget) setCartOpen(false);}}><aside className="drawer"><div className="drawer-head"><div><small>YOUR SELECTION</small><h2>Giỏ hàng <span>({count})</span></h2></div><button className="icon-btn" onClick={() => setCartOpen(false)}><X/></button></div>{count === 0 ? <div className="drawer-empty"><ShoppingBag size={35}/><h3>Giỏ hàng đang trống</h3><p>Khám phá sản phẩm và thêm vào giỏ nhé.</p><button className="primary-btn" onClick={() => setCartOpen(false)}>Tiếp tục mua sắm</button></div> : <><div className="cart-items">{products.filter(p => cart[p.id]).map(p => <div className="cart-item" key={p.id}><span>{p.icon}</span><div><b>{p.name}</b><small>{money(p.price)}</small><div className="quantity"><button onClick={() => setCart(old => ({...old,[p.id]:Math.max(0,(old[p.id]||0)-1)}))}>−</button><span>{cart[p.id]}</span><button onClick={() => add(p.id)}>+</button></div></div><strong>{money(p.price * cart[p.id])}</strong></div>)}</div><div className="drawer-total"><span>Tạm tính</span><b>{money(total)}</b><button className="primary-btn full" onClick={() => {setCartOpen(false);setCheckoutOpen(true);}}>Tiến hành đặt hàng <ArrowRight size={16}/></button><small>Chưa phát sinh thanh toán ở bước này.</small></div></>}</aside></div>}
-      {checkoutOpen && <div className="overlay" onMouseDown={e => {if(e.target === e.currentTarget) setCheckoutOpen(false);}}><div className="checkout-modal"><div className="drawer-head"><div><small>ORDER DETAILS</small><h2>Thông tin đặt hàng</h2></div><button className="icon-btn" onClick={() => setCheckoutOpen(false)}><X/></button></div><form onSubmit={submitOrder}><label>Họ và tên<input required value={customer.name} onChange={e => setCustomer({...customer,name:e.target.value})} placeholder="Tên người nhận"/></label><label>Email hoặc số điện thoại<input required value={customer.contact} onChange={e => setCustomer({...customer,contact:e.target.value})} placeholder="Thông tin liên hệ"/></label><label>Player ID / UID (nếu cần)<input value={customer.playerId} onChange={e => setCustomer({...customer,playerId:e.target.value})} placeholder="Không cung cấp mật khẩu"/></label><label>Ghi chú<textarea value={customer.note} onChange={e => setCustomer({...customer,note:e.target.value})} placeholder="Máy chủ, khu vực hoặc yêu cầu khác"/></label><div className="checkout-total"><span>Tổng đơn hàng</span><b>{money(total)}</b></div><div className="demo-warning">Bản MVP: tạo đơn thử nghiệm, chưa kết nối ngân hàng, QR hoặc cổng thanh toán thật. Không chuyển tiền vào tài khoản chưa được xác minh.</div><button className="primary-btn full" type="submit">Tạo đơn hàng demo <ArrowRight size={16}/></button></form></div></div>}
+      {notice && <div className="toast" role="status"><span>✦</span>{notice}<button onClick={() => setNotice("")} aria-label="Đóng thông báo">×</button></div>}
+
+      {cartOpen && <div className="overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) setCartOpen(false); }}><aside className="drawer"><div className="drawer-head"><div><div className="eyebrow">YOUR SELECTION</div><h2>Giỏ hàng <span>({count})</span></h2></div><button className="icon-close" onClick={() => setCartOpen(false)} aria-label="Đóng">×</button></div>{cartItems.length === 0 ? <div className="empty-cart"><span>🛒</span><h3>Giỏ hàng đang trống</h3><p>Thêm sản phẩm bạn muốn mua để tiếp tục.</p><button className="primary-button" onClick={() => setCartOpen(false)}>Tiếp tục mua sắm</button></div> : <><div className="drawer-items">{cartItems.map((product) => <div className="drawer-item" key={product.id}><span className={`mini-icon ${product.tone}`}>{product.icon}</span><div className="drawer-product"><b>{product.name}</b><small>{money(product.price)}</small><div className="quantity"><button onClick={() => changeQuantity(product.id, -1)} aria-label="Giảm số lượng">−</button><span>{cart[product.id]}</span><button onClick={() => changeQuantity(product.id, 1)} aria-label="Tăng số lượng">+</button></div></div><strong>{money(product.price * cart[product.id])}</strong></div>)}</div><div className="drawer-total"><span>Tạm tính</span><strong>{money(total)}</strong></div><button className="primary-button full-button" onClick={() => { setCartOpen(false); setCheckoutOpen(true); }}>Tiếp tục thanh toán <span>→</span></button><p className="demo-note">Bản demo — chưa phát sinh giao dịch thật.</p></>}</aside></div>}
+
+      {checkoutOpen && <div className="overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) setCheckoutOpen(false); }}><section className="checkout-modal"><div className="drawer-head"><div><div className="eyebrow">CHECKOUT PREVIEW</div><h2>Thông tin đơn hàng</h2></div><button className="icon-close" onClick={() => setCheckoutOpen(false)} aria-label="Đóng">×</button></div><label className="field-label">ID nhân vật / thông tin nhận hàng<input value={playerId} onChange={(event) => setPlayerId(event.target.value)} placeholder="Nhập ID trong game, không nhập mật khẩu" /></label><div className="field-label">Phương thức thanh toán</div><div className="payment-options"><button className={payment === "bank" ? "payment-option chosen" : "payment-option"} onClick={() => setPayment("bank")}><span>▦</span><b>QR ngân hàng</b><small>Chuyển khoản qua mã QR</small></button><button className={payment === "wallet" ? "payment-option chosen" : "payment-option"} onClick={() => setPayment("wallet")}><span>◈</span><b>Ví nội bộ</b><small>Số dư ví (bản demo)</small></button></div><div className="drawer-total"><span>Tổng thanh toán</span><strong>{money(total)}</strong></div><button className="primary-button full-button" onClick={submitDemoOrder}>Xác nhận xem trước <span>→</span></button><p className="demo-note">Đơn chỉ được lưu trên trình duyệt hiện tại để xem thử. Chưa kết nối cổng thanh toán, không chuyển tiền và không có giao hàng thật. <a href="/orders">Xem đơn hàng đã lưu →</a></p></section></div>}
     </main>
   );
 }
