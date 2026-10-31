@@ -5,14 +5,14 @@ export default async function AccountPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
   return (
-    <main className="orders-page">
-      <section className="orders-content">
-        <div className="eyebrow">CUSTOMER AREA</div>
-        <h1>Tài khoản <em>ShopGame</em></h1>
+    <main className="orders-page auth-page">
+      <section className="orders-content auth-card">
+        <div className="eyebrow">CINEWAVE MEMBER</div>
+        <h1>Tài khoản <em>CineWave</em></h1>
         <div className="orders-notice">
-          <strong>{session.user.name ?? session.user.email ?? "Người dùng"}</strong>
+          <strong>{session.user.name ?? session.user.email ?? "Thành viên"}</strong>
+          <p>Gmail: {session.user.email}</p>
           <p>Vai trò: {session.user.role}</p>
-          <p>ID tài khoản: {session.user.id}</p>
         </div>
         <form action={async () => {
           "use server";
