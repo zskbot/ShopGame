@@ -6,14 +6,14 @@ import { Bell, ChevronDown, ChevronRight, CircleHelp, Gamepad2, Grid3X3, Home, M
 type Game = "Tất cả" | "Liên Quân" | "Free Fire" | "PUBG Mobile";
 type Product = { id: string; game: Exclude<Game, "Tất cả">; name: string; description: string; price: number; oldPrice?: number; icon: string; tone: string; tag?: string };
 const products: Product[] = [
-  { id: "lq-1", game: "Liên Quân", name: "Liên Quân 225K Trắng", description: "Sổ tích lũy: 26 · Đã bán: 18", price: 225000, oldPrice: 250000, icon: "⚔️", tone: "arena", tag: "BÁN CHẠY" },
-  { id: "lq-2", game: "Liên Quân", name: "Liên Quân Trắng Garena", description: "Sổ tích lũy: 500 · Đã bán: 63", price: 500000, oldPrice: 550000, icon: "🛡️", tone: "knight", tag: "BÁN CHẠY" },
-  { id: "ff-1", game: "Free Fire", name: "Acc Giấy Bùa S", description: "Sổ tích lũy: 77 · Đã bán: 11", price: 77000, oldPrice: 99000, icon: "🔥", tone: "fire", tag: "ƯU ĐÃI" },
-  { id: "ff-2", game: "Free Fire", name: "Acc Rank Cao TTX", description: "Sổ tích lũy: 59 · Đã bán: 22", price: 59000, oldPrice: 79000, icon: "🎯", tone: "target" },
-  { id: "ff-3", game: "Free Fire", name: "Túi Mì Pet Tim", description: "Sổ tích lũy: 0 · Đã bán: 1", price: 9000, icon: "💜", tone: "pet" },
-  { id: "pubg-1", game: "PUBG Mobile", name: "Acc Tốc Độ Vượt 500+", description: "Sổ tích lũy: 50 · Đã bán: 8", price: 25000, icon: "🎮", tone: "pubg" },
-  { id: "lq-3", game: "Liên Quân", name: "Túi Mì Trải Nghiệm", description: "Sổ tích lũy: 320 · Đã bán: 15", price: 32000, icon: "🎁", tone: "gift" },
-  { id: "lq-4", game: "Liên Quân", name: "Túi Mì Trải Nghiệm V2", description: "Sổ tích lũy: 137 · Đã bán: 9", price: 137000, icon: "💎", tone: "diamond" },
+  { id: "lq-1", game: "Liên Quân", name: "Liên Quân 225K Trắng", description: "Sản phẩm minh họa · chưa mở bán", price: 225000, oldPrice: 250000, icon: "⚔️", tone: "arena", tag: "BÁN CHẠY" },
+  { id: "lq-2", game: "Liên Quân", name: "Liên Quân Trắng Garena", description: "Sản phẩm minh họa · chưa mở bán", price: 500000, oldPrice: 550000, icon: "🛡️", tone: "knight", tag: "BÁN CHẠY" },
+  { id: "ff-1", game: "Free Fire", name: "Acc Giấy Bùa S", description: "Sản phẩm minh họa · chưa mở bán", price: 77000, oldPrice: 99000, icon: "🔥", tone: "fire", tag: "ƯU ĐÃI" },
+  { id: "ff-2", game: "Free Fire", name: "Acc Rank Cao TTX", description: "Sản phẩm minh họa · chưa mở bán", price: 59000, oldPrice: 79000, icon: "🎯", tone: "target" },
+  { id: "ff-3", game: "Free Fire", name: "Túi Mì Pet Tim", description: "Sản phẩm minh họa · chưa mở bán", price: 9000, icon: "💜", tone: "pet" },
+  { id: "pubg-1", game: "PUBG Mobile", name: "Acc Tốc Độ Vượt 500+", description: "Sản phẩm minh họa · chưa mở bán", price: 25000, icon: "🎮", tone: "pubg" },
+  { id: "lq-3", game: "Liên Quân", name: "Túi Mì Trải Nghiệm", description: "Sản phẩm minh họa · chưa mở bán", price: 32000, icon: "🎁", tone: "gift" },
+  { id: "lq-4", game: "Liên Quân", name: "Túi Mì Trải Nghiệm V2", description: "Sản phẩm minh họa · chưa mở bán", price: 137000, icon: "💎", tone: "diamond" },
 ];
 type Order = { id: string; createdAt: string; playerId: string; payment: "bank"; total: number; items: { id: string; name: string; game: string; quantity: number; unitPrice: number }[] };
 const CART_KEY = "gamehub.cart.v1";
@@ -108,6 +108,7 @@ export default function HomePage() {
       <div className="section-title"><div><span className="section-kicker">SHOPGAME MARKET</span><h2>Kho acc <em>{game === "Tất cả" ? "game" : game}</em></h2></div><a href="#catalog">Xem tất cả <ChevronRight size={14}/></a></div>
       <div className="game-tabs">{(["Tất cả","Liên Quân","Free Fire","PUBG Mobile"] as Game[]).map(g => <button key={g} className={game === g ? "active" : ""} onClick={() => setGame(g)}>{g}</button>)}</div>
       <label className="catalog-search"><Search size={16}/><input id="product-search" value={query} onChange={e => setQuery(e.target.value)} placeholder="Tìm kiếm sản phẩm..."/><span>/</span></label>
+      <p className="catalog-disclaimer">Danh sách sản phẩm và giá hiện là dữ liệu minh họa, chưa phải hàng tồn kho hoặc báo giá giao dịch thật.</p>
       <div className="product-grid">{visible.map((p) => <article className="game-product" key={p.id}>
         <div className={`product-cover ${p.tone}`}><span className="cover-pattern"/><span className="cover-game">{p.game}</span>{p.tag && <b className="sale-tag">{p.tag}</b>}<span className="cover-emoji">{p.icon}</span><span className="cover-caption">SHOPGAME · DIGITAL</span></div>
         <div className="product-body"><h3>{p.name}</h3><div className="product-stats"><span>Danh mục: <b>Tài khoản game</b></span><span>Trạng thái: <b>Sản phẩm mẫu</b></span></div><div className="product-price"><strong>{money(p.price)}</strong>{p.oldPrice && <del>{money(p.oldPrice)}</del>}</div><button className="view-product" onClick={() => add(p)}>Thêm vào giỏ <ChevronRight size={14}/></button></div>
