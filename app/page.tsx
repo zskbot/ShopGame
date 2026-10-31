@@ -51,14 +51,20 @@ export default function HomePage() {
         }
       }
     } catch {
-      window.localStorage.removeItem(CART_STORAGE_KEY);
+      setCart({});
     } finally {
       setCartReady(true);
     }
   }, []);
 
   useEffect(() => {
-    if (cartReady) window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+    if (cartReady) {
+      try {
+        window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+      } catch {
+        setNotice("Lưu trữ trình duyệt không khả dụng; giỏ hàng sẽ không được giữ sau khi tải lại trang.");
+      }
+    }
   }, [cart, cartReady]);
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
