@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowRight, Bookmark, Check, ChevronDown, Clapperboard, Clock3, Film, Menu, Play, Search, ShieldCheck, Sparkles, X } from "lucide-react";
+import { ArrowRight, Bookmark, Check, Clapperboard, Clock3, Film, Menu, Play, Search, ShieldCheck, Sparkles, X } from "lucide-react";
 
 type Movie = {
   id: string;
