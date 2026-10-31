@@ -74,7 +74,7 @@ export default function HomePage() {
   }
 
   return <main className="shop-page">
-    <div className="top-notice"><Zap size={13} fill="currentColor" /> NẠP ATM/MOMO +10% <span>•</span> GIAO DỊCH TỰ ĐỘNG 24/7</div>
+    <div className="top-notice"><Zap size={13} fill="currentColor" /> SHOPGAME STORE <span>•</span> DANH MỤC GAME & DỊCH VỤ</div>
     <header className="mobile-header">
       <button className="round-icon" onClick={() => setMenuOpen(v => !v)} aria-label="Mở menu"><Menu size={19}/></button>
       <a className="shop-logo" href="#"><span>Shop</span>Game<span className="logo-dot">.</span></a>
@@ -86,7 +86,7 @@ export default function HomePage() {
       </div>
     </header>
     {menuOpen && <nav className="mobile-menu"><a href="#home" onClick={() => setMenuOpen(false)}>Trang chủ</a><a href="#catalog" onClick={() => setMenuOpen(false)}>Cửa hàng</a><a href="/orders">Đơn hàng</a><a href="/account">Tài khoản</a></nav>}
-    <div className="ticker"><span>⚡</span> Nạp ATM/MoMo <b>+10%</b> <span>•</span> Giao dịch tự động 24/7</div>
+    <div className="ticker"><span>⚡</span> Thông tin sản phẩm rõ ràng <span>•</span> Hỗ trợ khách hàng</div>
 
     <section className="hero-wrap" id="home">
       <div className="hero-banner">
@@ -99,9 +99,9 @@ export default function HomePage() {
     </section>
 
     <section className="service-notes">
-      <article><span className="service-icon green"><ShieldCheck size={20}/></span><div><b>Nguyên Nguyễn Trung Hiếu - Zalo</b><small>Hỗ trợ khách hàng 24/7</small></div><span className="service-arrow">›</span></article>
+      <article><span className="service-icon green"><ShieldCheck size={20}/></span><div><b>Hỗ trợ khách hàng ShopGame</b><small>Tiếp nhận câu hỏi và hỗ trợ đơn hàng</small></div><span className="service-arrow">›</span></article>
       <article><span className="service-icon purple"><Wallet size={20}/></span><div><b>Thời gian làm việc</b><small>Tự động giao dịch 24/24, hỗ trợ giải đáp trong thời gian xác nhận</small></div><span className="service-arrow">›</span></article>
-      <article><span className="service-icon orange"><Package size={20}/></span><div><b>Ưu đãi nạp tiền</b><small>ATM/MoMo <strong>+10%</strong> · Nạp 100.000 nhận thêm 10.000</small></div><span className="service-arrow">›</span></article>
+      <article><span className="service-icon orange"><Package size={20}/></span><div><b>Chính sách ưu đãi</b><small>Thông tin khuyến mãi được cập nhật công khai</small></div><span className="service-arrow">›</span></article>
     </section>
 
     <section className="catalog-section" id="catalog">
