@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "GameHub — Cửa hàng game",
-  description: "Nạp game và khám phá dịch vụ Liên Quân, Free Fire, PUBG Mobile.",
-  applicationName: "GameHub"
+  title: "VelClaw Game Shop — Game top-ups & digital goods",
+  description: "A curated storefront for Liên Quân Mobile, Free Fire and PUBG Mobile game services."
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
