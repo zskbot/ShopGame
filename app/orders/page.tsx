@@ -68,10 +68,7 @@ export default function OrdersPage() {
   return (
     <main className="orders-page">
       <header className="orders-header">
-        <Link className="brand" href="/">
-          <span className="brand-mark">G</span>
-          <span>GAME<span className="brand-accent">HUB</span><small>GAME DIGITAL MARKET</small></span>
-        </Link>
+        <Link className="shop-logo" href="/">ShopGame<span className="logo-dot">.</span></Link>
         <Link className="orders-back" href="/">← Quay lại cửa hàng</Link>
       </header>
 

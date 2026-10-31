@@ -5,9 +5,9 @@ export default function LoginPage() {
   return (
     <main className="orders-page">
       <section className="orders-content">
-        <div className="eyebrow">GAMEHUB ACCOUNT</div>
+        <div className="eyebrow">SHOPGAME ACCOUNT</div>
         <h1>Đăng nhập <em>tài khoản</em></h1>
-        <p className="orders-intro">Đăng nhập qua nhà cung cấp OAuth. GameHub không yêu cầu mật khẩu game.</p>
+        <p className="orders-intro">Đăng nhập qua nhà cung cấp OAuth. ShopGame không yêu cầu mật khẩu game.</p>
         <div className="orders-empty">
           <form action={async () => {
             "use server";
