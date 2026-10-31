@@ -8,7 +8,7 @@ export default async function AccountPage() {
     <main className="orders-page">
       <section className="orders-content">
         <div className="eyebrow">CUSTOMER AREA</div>
-        <h1>Tài khoản <em>GameHub</em></h1>
+        <h1>Tài khoản <em>ShopGame</em></h1>
         <div className="orders-notice">
           <strong>{session.user.name ?? session.user.email ?? "Người dùng"}</strong>
           <p>Vai trò: {session.user.role}</p>
