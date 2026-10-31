@@ -1,4 +1,8 @@
-import { Pool } from "@neondatabase/serverless";
+import ws from "ws";
+import { neonConfig, Pool } from "@neondatabase/serverless";
+
+// Vercel Node.js runtimes need an explicit WebSocket implementation for Pool.
+neonConfig.webSocketConstructor = ws;
 
 let pool: Pool | null = null;
 
