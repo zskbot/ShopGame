@@ -15,7 +15,7 @@ const products: Product[] = [
   { id: "lq-3", game: "Liên Quân", name: "Túi Mì Trải Nghiệm", description: "Sổ tích lũy: 320 · Đã bán: 15", price: 32000, sold: 15, icon: "🎁", tone: "gift" },
   { id: "lq-4", game: "Liên Quân", name: "Túi Mì Trải Nghiệm V2", description: "Sổ tích lũy: 137 · Đã bán: 9", price: 137000, sold: 9, icon: "💎", tone: "diamond" },
 ];
-type Order = { id: string; createdAt: string; playerId: string; total: number; items: { id: string; name: string; game: string; quantity: number; unitPrice: number }[] };
+type Order = { id: string; createdAt: string; playerId: string; payment: "bank"; total: number; items: { id: string; name: string; game: string; quantity: number; unitPrice: number }[] };
 const CART_KEY = "gamehub.cart.v1";
 const ORDER_KEY = "gamehub.orders.v1";
 const money = (value: number) => new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(value);
@@ -63,7 +63,7 @@ export default function HomePage() {
   }
   function placeOrder() {
     if (!playerId.trim()) { setNotice("Vui lòng nhập ID nhân vật hoặc thông tin nhận hàng."); return; }
-    const order: Order = { id: "SG-" + Date.now().toString(36).toUpperCase(), createdAt: new Date().toISOString(), playerId: playerId.trim(), total, items: items.map(p => ({ id: p.id, name: p.name, game: p.game, quantity: cart[p.id], unitPrice: p.price })) };
+    const order: Order = { id: "SG-" + Date.now().toString(36).toUpperCase(), createdAt: new Date().toISOString(), playerId: playerId.trim(), payment: "bank", total, items: items.map(p => ({ id: p.id, name: p.name, game: p.game, quantity: cart[p.id], unitPrice: p.price })) };
     try {
       const saved = localStorage.getItem(ORDER_KEY);
       const parsed: unknown = saved ? JSON.parse(saved) : [];
