@@ -4,27 +4,35 @@
 
 create extension if not exists pgcrypto;
 
+create schema if not exists private;
+revoke all on schema private from public, anon, authenticated;
+grant usage on schema private to anon, authenticated;
+
 create table if not exists public.shop_admins (
   user_id uuid primary key references auth.users(id) on delete cascade,
   created_at timestamptz not null default now()
 );
 
-create or replace function public.is_shop_admin()
+create or replace function private.is_shop_admin()
 returns boolean
 language sql
 stable
 security definer
 set search_path = ''
-as $$
-  select exists (
-    select 1
-    from public.shop_admins a
-    where a.user_id = (select auth.uid())
+as $
+  select coalesce(
+    (select auth.uid()) is not null
+    and exists (
+      select 1
+      from public.shop_admins a
+      where a.user_id = (select auth.uid())
+    ),
+    false
   );
-$$;
+$;
 
-revoke all on function public.is_shop_admin() from public;
-grant execute on function public.is_shop_admin() to anon, authenticated;
+revoke all on function private.is_shop_admin() from public;
+grant execute on function private.is_shop_admin() to anon, authenticated;
 
 create table if not exists public.products (
   id uuid primary key default gen_random_uuid(),
@@ -163,23 +171,23 @@ alter table public.wallet_ledger enable row level security;
 
 drop policy if exists "Admins manage shop admins" on public.shop_admins;
 create policy "Admins manage shop admins" on public.shop_admins
-  for all to authenticated using (public.is_shop_admin()) with check (public.is_shop_admin());
+  for all to authenticated using (private.is_shop_admin()) with check (private.is_shop_admin());
 
 drop policy if exists "Public reads active products" on public.products;
 create policy "Public reads active products" on public.products
-  for select to anon, authenticated using (status = 'active' or public.is_shop_admin());
+  for select to anon, authenticated using (status = 'active' or private.is_shop_admin());
 
 drop policy if exists "Admins manage products" on public.products;
 create policy "Admins manage products" on public.products
-  for all to authenticated using (public.is_shop_admin()) with check (public.is_shop_admin());
+  for all to authenticated using (private.is_shop_admin()) with check (private.is_shop_admin());
 
 drop policy if exists "Customers read own orders" on public.orders;
 create policy "Customers read own orders" on public.orders
-  for select to authenticated using (user_id = (select auth.uid()) or public.is_shop_admin());
+  for select to authenticated using (user_id = (select auth.uid()) or private.is_shop_admin());
 
 drop policy if exists "Admins manage orders" on public.orders;
 create policy "Admins manage orders" on public.orders
-  for all to authenticated using (public.is_shop_admin()) with check (public.is_shop_admin());
+  for all to authenticated using (private.is_shop_admin()) with check (private.is_shop_admin());
 
 drop policy if exists "Customers read own order items" on public.order_items;
 create policy "Customers read own order items" on public.order_items
@@ -187,13 +195,13 @@ create policy "Customers read own order items" on public.order_items
     exists (
       select 1 from public.orders o
       where o.id = order_id
-        and (o.user_id = (select auth.uid()) or public.is_shop_admin())
+        and (o.user_id = (select auth.uid()) or private.is_shop_admin())
     )
   );
 
 drop policy if exists "Admins manage order items" on public.order_items;
 create policy "Admins manage order items" on public.order_items
-  for all to authenticated using (public.is_shop_admin()) with check (public.is_shop_admin());
+  for all to authenticated using (private.is_shop_admin()) with check (private.is_shop_admin());
 
 drop policy if exists "Customers read own payments" on public.payment_transactions;
 create policy "Customers read own payments" on public.payment_transactions
@@ -201,30 +209,59 @@ create policy "Customers read own payments" on public.payment_transactions
     exists (
       select 1 from public.orders o
       where o.id = order_id
-        and (o.user_id = (select auth.uid()) or public.is_shop_admin())
+        and (o.user_id = (select auth.uid()) or private.is_shop_admin())
     )
   );
 
 drop policy if exists "Admins manage payments" on public.payment_transactions;
 create policy "Admins manage payments" on public.payment_transactions
-  for all to authenticated using (public.is_shop_admin()) with check (public.is_shop_admin());
+  for all to authenticated using (private.is_shop_admin()) with check (private.is_shop_admin());
 
 drop policy if exists "Customers read own wallet" on public.wallet_accounts;
 create policy "Customers read own wallet" on public.wallet_accounts
-  for select to authenticated using (user_id = (select auth.uid()) or public.is_shop_admin());
+  for select to authenticated using (user_id = (select auth.uid()) or private.is_shop_admin());
 
 drop policy if exists "Admins manage wallets" on public.wallet_accounts;
 create policy "Admins manage wallets" on public.wallet_accounts
-  for all to authenticated using (public.is_shop_admin()) with check (public.is_shop_admin());
+  for all to authenticated using (private.is_shop_admin()) with check (private.is_shop_admin());
 
 drop policy if exists "Customers read own wallet ledger" on public.wallet_ledger;
 create policy "Customers read own wallet ledger" on public.wallet_ledger
-  for select to authenticated using (user_id = (select auth.uid()) or public.is_shop_admin());
+  for select to authenticated using (user_id = (select auth.uid()) or private.is_shop_admin());
 
 drop policy if exists "Admins manage wallet ledger" on public.wallet_ledger;
 create policy "Admins manage wallet ledger" on public.wallet_ledger
-  for all to authenticated using (public.is_shop_admin()) with check (public.is_shop_admin());
+  for all to authenticated using (private.is_shop_admin()) with check (private.is_shop_admin());
 
 -- Intentionally no INSERT/UPDATE policies for customer payments or wallet ledger.
 -- Future payment webhooks and wallet operations must run server-side, verify
 -- provider signatures, use idempotency keys, and execute balance changes atomically.
+
+
+-- Supabase Data API access is opt-in on current projects. Explicit grants
+-- define which roles can reach each table; RLS above still filters rows.
+grant usage on schema public to anon, authenticated, service_role;
+grant select on table public.products to anon;
+grant select on table public.products to authenticated;
+
+grant select, insert, update, delete on table
+  public.shop_admins,
+  public.products,
+  public.orders,
+  public.order_items,
+  public.payment_transactions,
+  public.wallet_accounts,
+  public.wallet_ledger
+to authenticated;
+
+-- Trusted server-side operations only. Never expose service_role credentials
+-- to a browser or a NEXT_PUBLIC_* environment variable.
+grant select, insert, update, delete on table
+  public.shop_admins,
+  public.products,
+  public.orders,
+  public.order_items,
+  public.payment_transactions,
+  public.wallet_accounts,
+  public.wallet_ledger
+to service_role;
