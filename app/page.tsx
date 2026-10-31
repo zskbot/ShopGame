@@ -120,13 +120,13 @@ export default function HomePage() {
 
     <section className="support-section" id="support"><div className="section-title"><div><span className="section-kicker">HELP CENTER</span><h2>Câu hỏi <em>thường gặp</em></h2></div></div>{["Mua acc game tại ShopGame có tự động không?","Nạp tiền vào ShopGame có được khuyến mãi không?","Sau khi mua tôi xem lại thông tin ở đâu?","Shop có hỗ trợ nếu gặp vấn đề không?"].map((q,i)=><details className="faq" key={q}><summary>{q}<ChevronDown size={16}/></summary><p>ShopGame đang ở phiên bản xem trước. Vui lòng liên hệ hỗ trợ để được hướng dẫn; không gửi mật khẩu tài khoản game.</p></details>)}</section>
 
-    <section className="hotline-card"><div className="hotline-heading"><span>☎</span><div><small>HOTLINE TƯ VẤN</small><strong>0777.776.025</strong><small>Hỗ trợ khách hàng ShopGame</small></div></div><div className="hotline-row"><span>◷</span><div><b>Thời gian làm việc</b><small>Giao dịch tự động 24/24</small></div></div><a href="https://zalo.me/0777776025" target="_blank" rel="noreferrer">Chat Zalo ngay <ChevronRight size={14}/></a></section>
+    <section className="hotline-card"><div className="hotline-heading"><span>☎</span><div><small>HỖ TRỢ SHOPGAME</small><strong>Hỗ trợ khách hàng</strong><small>Tiếp nhận yêu cầu hỗ trợ</small></div></div><div className="hotline-row"><span>◷</span><div><b>Thời gian làm việc</b><small>Giao dịch tự động 24/24</small></div></div><a href="#support">Liên hệ hỗ trợ <ChevronRight size={14}/></a></section>
 
     <footer className="shop-footer"><a className="shop-logo" href="#">ShopGame<span className="logo-dot">.</span></a><p>© 2026 ShopGame. Nền tảng độc lập, không liên kết chính thức với nhà phát hành game.</p><div className="footer-social">f　◎　𝕏　▶</div></footer>
 
     <nav className="bottom-nav"><a className="selected" href="#home"><Home/><span>Home</span></a><a href="#catalog"><Grid3X3/><span>Menu</span></a><a href="#trust"><ShieldCheck/><span>Uy tín</span></a><a href="#catalog"><Wallet/><span>Nạp tiền</span></a><a href="/account"><UserRound/><span>Tài khoản</span></a></nav>
     <button className="chat-fab" onClick={() => setChatOpen(v => !v)} aria-label="Chat hỗ trợ"><MessageCircle size={24}/></button>
-    {chatOpen && <div className="chat-popover"><div><b>ShopGame hỗ trợ</b><button onClick={() => setChatOpen(false)}><X size={15}/></button></div><p>Xin chào! Bạn cần hỗ trợ về sản phẩm hoặc đơn hàng?</p><a href="https://zalo.me/0777776025" target="_blank" rel="noreferrer">Liên hệ qua Zalo <ChevronRight size={14}/></a></div>}
+    {chatOpen && <div className="chat-popover"><div><b>ShopGame hỗ trợ</b><button onClick={() => setChatOpen(false)}><X size={15}/></button></div><p>Xin chào! Bạn cần hỗ trợ về sản phẩm hoặc đơn hàng?</p><a href="#support">Xem câu hỏi thường gặp <ChevronRight size={14}/></a></div>}
     <button className="back-top" onClick={() => window.scrollTo({top:0,behavior:"smooth"})}>↑</button>
 
     {notice && <div className="notice-toast" role="status">{notice}<button onClick={() => setNotice("")}><X size={16}/></button></div>}
