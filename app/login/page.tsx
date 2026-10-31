@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { signIn } from "@/auth";
 
 export default function LoginPage() {
@@ -21,7 +22,7 @@ export default function LoginPage() {
             <button className="primary-button" type="submit">Tiếp tục với Google ↗</button>
           </form>
           <p>Đăng nhập cần OAuth credentials và Neon staging được cấu hình.</p>
-          <a className="orders-back" href="/">← Quay lại cửa hàng</a>
+          <Link className="orders-back" href="/">← Quay lại cửa hàng</Link>
         </div>
       </section>
     </main>
