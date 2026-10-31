@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Category = "Tất cả" | "Liên Quân" | "Free Fire" | "PUBG Mobile" | "Tài khoản" | "Vật phẩm";
 type Product = {
@@ -27,6 +27,10 @@ const products: Product[] = [
   { id: "acc-2", game: "Free Fire", category: "Tài khoản", name: "Khu vực tài khoản Free Fire", description: "Chỉ đăng tin khi đáp ứng điều khoản nhà phát hành", price: 0, tag: "Sắp ra mắt", icon: "🎮", tone: "orange" }
 ];
 
+type StoredOrder = { id: string; createdAt: string; playerId: string; payment: "bank" | "wallet"; total: number; items: { id: string; name: string; game: string; quantity: number; unitPrice: number }[]; };
+
+const CART_STORAGE_KEY = "gamehub.cart.v1";
+const ORDERS_STORAGE_KEY = "gamehub.orders.v1";
 const categories: Category[] = ["Tất cả", "Liên Quân", "Free Fire", "PUBG Mobile", "Tài khoản", "Vật phẩm"];
 const money = (value: number) => new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(value);
 
@@ -34,6 +38,28 @@ export default function HomePage() {
   const [category, setCategory] = useState<Category>("Tất cả");
   const [query, setQuery] = useState("");
   const [cart, setCart] = useState<Record<string, number>>({});
+  const [cartReady, setCartReady] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(CART_STORAGE_KEY);
+      if (saved) {
+        const parsed: unknown = JSON.parse(saved);
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          const safeCart = Object.fromEntries(Object.entries(parsed).filter(([id, quantity]) => products.some((product) => product.id === id) && typeof quantity === "number" && Number.isInteger(quantity) && quantity > 0 && quantity <= 99)) as Record<string, number>;
+          setCart(safeCart);
+        }
+      }
+    } catch {
+      window.localStorage.removeItem(CART_STORAGE_KEY);
+    } finally {
+      setCartReady(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (cartReady) window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+  }, [cart, cartReady]);
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [payment, setPayment] = useState<"bank" | "wallet">("bank");
@@ -72,9 +98,27 @@ export default function HomePage() {
       setNotice("Vui lòng nhập ID nhân vật / thông tin nhận hàng cần thiết.");
       return;
     }
-    setCheckoutOpen(false);
-    setCartOpen(false);
-    setNotice("Đây là bản demo: đơn chưa được tạo và chưa có khoản thanh toán nào được xử lý.");
+    const order: StoredOrder = {
+      id: "GH-" + Date.now().toString(36).toUpperCase(),
+      createdAt: new Date().toISOString(),
+      playerId: playerId.trim(),
+      payment,
+      total,
+      items: cartItems.map((product) => ({ id: product.id, name: product.name, game: product.game, quantity: cart[product.id], unitPrice: product.price }))
+    };
+    try {
+      const savedOrders = window.localStorage.getItem(ORDERS_STORAGE_KEY);
+      const parsedOrders: unknown = savedOrders ? JSON.parse(savedOrders) : [];
+      const safeOrders = Array.isArray(parsedOrders) ? parsedOrders : [];
+      window.localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify([order, ...safeOrders].slice(0, 50)));
+      setCart({});
+      window.localStorage.removeItem(CART_STORAGE_KEY);
+      setCheckoutOpen(false);
+      setCartOpen(false);
+      setNotice("Đã lưu đơn demo " + order.id + " trên thiết bị này. Chưa có thanh toán hoặc giao hàng thật.");
+    } catch {
+      setNotice("Không thể lưu đơn trên trình duyệt. Hãy kiểm tra dung lượng lưu trữ rồi thử lại.");
+    }
   }
 
   return (
@@ -82,7 +126,7 @@ export default function HomePage() {
       <div className="announcement"><span className="pulse" /> GAMEHUB STORE <span className="announcement-divider">/</span> Nền tảng mua sắm game đang trong giai đoạn MVP</div>
       <header className="topbar">
         <a className="brand" href="#" aria-label="GameHub trang chủ"><span className="brand-mark">G</span><span>GAME<span className="brand-accent">HUB</span><small>GAME DIGITAL MARKET</small></span></a>
-        <nav className="desktop-nav" aria-label="Điều hướng chính"><a className="active" href="#store">Cửa hàng</a><a href="#games">Trò chơi</a><a href="#how">Hướng dẫn</a></nav>
+        <nav className="desktop-nav" aria-label="Điều hướng chính"><a className="active" href="#store">Cửa hàng</a><a href="#games">Trò chơi</a><a href="#how">Hướng dẫn</a><a href="/orders">Đơn hàng</a></nav>
         <div className="top-actions"><span className="secure-label">✦ Giao dịch an toàn</span><button className="cart-button" onClick={() => setCartOpen(true)} aria-label={`Mở giỏ hàng, ${count} sản phẩm`}>Giỏ hàng <span>{count}</span></button></div>
       </header>
 
@@ -108,7 +152,7 @@ export default function HomePage() {
 
       {cartOpen && <div className="overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) setCartOpen(false); }}><aside className="drawer"><div className="drawer-head"><div><div className="eyebrow">YOUR SELECTION</div><h2>Giỏ hàng <span>({count})</span></h2></div><button className="icon-close" onClick={() => setCartOpen(false)} aria-label="Đóng">×</button></div>{cartItems.length === 0 ? <div className="empty-cart"><span>🛒</span><h3>Giỏ hàng đang trống</h3><p>Thêm sản phẩm bạn muốn mua để tiếp tục.</p><button className="primary-button" onClick={() => setCartOpen(false)}>Tiếp tục mua sắm</button></div> : <><div className="drawer-items">{cartItems.map((product) => <div className="drawer-item" key={product.id}><span className={`mini-icon ${product.tone}`}>{product.icon}</span><div className="drawer-product"><b>{product.name}</b><small>{money(product.price)}</small><div className="quantity"><button onClick={() => changeQuantity(product.id, -1)} aria-label="Giảm số lượng">−</button><span>{cart[product.id]}</span><button onClick={() => changeQuantity(product.id, 1)} aria-label="Tăng số lượng">+</button></div></div><strong>{money(product.price * cart[product.id])}</strong></div>)}</div><div className="drawer-total"><span>Tạm tính</span><strong>{money(total)}</strong></div><button className="primary-button full-button" onClick={() => { setCartOpen(false); setCheckoutOpen(true); }}>Tiếp tục thanh toán <span>→</span></button><p className="demo-note">Bản demo — chưa phát sinh giao dịch thật.</p></>}</aside></div>}
 
-      {checkoutOpen && <div className="overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) setCheckoutOpen(false); }}><section className="checkout-modal"><div className="drawer-head"><div><div className="eyebrow">CHECKOUT PREVIEW</div><h2>Thông tin đơn hàng</h2></div><button className="icon-close" onClick={() => setCheckoutOpen(false)} aria-label="Đóng">×</button></div><label className="field-label">ID nhân vật / thông tin nhận hàng<input value={playerId} onChange={(event) => setPlayerId(event.target.value)} placeholder="Nhập ID trong game, không nhập mật khẩu" /></label><div className="field-label">Phương thức thanh toán</div><div className="payment-options"><button className={payment === "bank" ? "payment-option chosen" : "payment-option"} onClick={() => setPayment("bank")}><span>▦</span><b>QR ngân hàng</b><small>Chuyển khoản qua mã QR</small></button><button className={payment === "wallet" ? "payment-option chosen" : "payment-option"} onClick={() => setPayment("wallet")}><span>◈</span><b>Ví nội bộ</b><small>Số dư ví (bản demo)</small></button></div><div className="drawer-total"><span>Tổng thanh toán</span><strong>{money(total)}</strong></div><button className="primary-button full-button" onClick={submitDemoOrder}>Xác nhận xem trước <span>→</span></button><p className="demo-note">Chưa kết nối cổng thanh toán. Không chuyển tiền vào tài khoản nào ở bước này.</p></section></div>}
+      {checkoutOpen && <div className="overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) setCheckoutOpen(false); }}><section className="checkout-modal"><div className="drawer-head"><div><div className="eyebrow">CHECKOUT PREVIEW</div><h2>Thông tin đơn hàng</h2></div><button className="icon-close" onClick={() => setCheckoutOpen(false)} aria-label="Đóng">×</button></div><label className="field-label">ID nhân vật / thông tin nhận hàng<input value={playerId} onChange={(event) => setPlayerId(event.target.value)} placeholder="Nhập ID trong game, không nhập mật khẩu" /></label><div className="field-label">Phương thức thanh toán</div><div className="payment-options"><button className={payment === "bank" ? "payment-option chosen" : "payment-option"} onClick={() => setPayment("bank")}><span>▦</span><b>QR ngân hàng</b><small>Chuyển khoản qua mã QR</small></button><button className={payment === "wallet" ? "payment-option chosen" : "payment-option"} onClick={() => setPayment("wallet")}><span>◈</span><b>Ví nội bộ</b><small>Số dư ví (bản demo)</small></button></div><div className="drawer-total"><span>Tổng thanh toán</span><strong>{money(total)}</strong></div><button className="primary-button full-button" onClick={submitDemoOrder}>Xác nhận xem trước <span>→</span></button><p className="demo-note">Đơn chỉ được lưu trên trình duyệt hiện tại để xem thử. Chưa kết nối cổng thanh toán, không chuyển tiền và không có giao hàng thật. <a href="/orders">Xem đơn hàng đã lưu →</a></p></section></div>}
     </main>
   );
 }
