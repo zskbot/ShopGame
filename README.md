@@ -6,6 +6,7 @@ A standalone Vietnamese game-commerce storefront for Liên Quân Mobile, Free Fi
 
 - Responsive storefront with game categories, product search and filters.
 - Product cards, cart quantity controls and checkout preview.
+- Browser-local cart persistence and a local demo order history at `/orders`.
 - Payment method selection: bank QR transfer or internal wallet (demo UI only).
 - Player/account delivery details are collected only as required for a selected product.
 - Health endpoint at `/api/health`.
