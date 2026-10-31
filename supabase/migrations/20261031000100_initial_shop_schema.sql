@@ -19,7 +19,7 @@ language sql
 stable
 security definer
 set search_path = ''
-as $
+as $func$
   select coalesce(
     (select auth.uid()) is not null
     and exists (
@@ -29,7 +29,7 @@ as $
     ),
     false
   );
-$;
+$func$;
 
 revoke all on function private.is_shop_admin() from public;
 grant execute on function private.is_shop_admin() to anon, authenticated;
