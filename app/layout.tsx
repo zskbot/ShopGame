@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "VelClaw Game Shop — Game top-ups & digital goods",
-  description: "A curated storefront for Liên Quân Mobile, Free Fire and PUBG Mobile game services."
+  title: "ShopGame — Cửa hàng game online",
+  description: "ShopGame - khám phá tài khoản, vật phẩm và dịch vụ Liên Quân Mobile, Free Fire và PUBG Mobile."
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
