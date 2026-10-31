@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ShopGame — Cửa hàng game online",
-  description: "ShopGame - khám phá tài khoản, vật phẩm và dịch vụ Liên Quân Mobile, Free Fire và PUBG Mobile."
+  title: "CineWave — Khám phá thế giới điện ảnh",
+  description: "CineWave là không gian khám phá phim, thể loại và nội dung điện ảnh. Thư viện và tính năng phát phim đang được phát triển.",
+  applicationName: "CineWave",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

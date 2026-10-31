@@ -1,137 +1,116 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Bell, ChevronDown, ChevronRight, CircleHelp, Gamepad2, Grid3X3, Home, Menu, MessageCircle, Package, Search, ShieldCheck, ShoppingCart, UserRound, Wallet, X, Zap } from "lucide-react";
+import { useMemo, useState } from "react";
+import { ArrowRight, Bookmark, Check, Clapperboard, Clock3, Film, Menu, Play, Search, ShieldCheck, Sparkles, X } from "lucide-react";
 
-type Game = "Tất cả" | "Liên Quân" | "Free Fire" | "PUBG Mobile";
-type Product = { id: string; game: Exclude<Game, "Tất cả">; name: string; description: string; price: number; icon: string; tone: string };
-const products: Product[] = [
-  { id: "lq-1", game: "Liên Quân", name: "Liên Quân 225K Trắng", description: "Sản phẩm minh họa · chưa mở bán", price: 225000, icon: "⚔️", tone: "arena" },
-  { id: "lq-2", game: "Liên Quân", name: "Liên Quân Trắng Garena", description: "Sản phẩm minh họa · chưa mở bán", price: 500000, icon: "🛡️", tone: "knight" },
-  { id: "ff-1", game: "Free Fire", name: "Acc Giấy Bùa S", description: "Sản phẩm minh họa · chưa mở bán", price: 77000, icon: "🔥", tone: "fire" },
-  { id: "ff-2", game: "Free Fire", name: "Acc Rank Cao TTX", description: "Sản phẩm minh họa · chưa mở bán", price: 59000, icon: "🎯", tone: "target" },
-  { id: "ff-3", game: "Free Fire", name: "Túi Mì Pet Tim", description: "Sản phẩm minh họa · chưa mở bán", price: 9000, icon: "💜", tone: "pet" },
-  { id: "pubg-1", game: "PUBG Mobile", name: "Acc Tốc Độ Vượt 500+", description: "Sản phẩm minh họa · chưa mở bán", price: 25000, icon: "🎮", tone: "pubg" },
-  { id: "lq-3", game: "Liên Quân", name: "Túi Mì Trải Nghiệm", description: "Sản phẩm minh họa · chưa mở bán", price: 32000, icon: "🎁", tone: "gift" },
-  { id: "lq-4", game: "Liên Quân", name: "Túi Mì Trải Nghiệm V2", description: "Sản phẩm minh họa · chưa mở bán", price: 137000, icon: "💎", tone: "diamond" },
+type Movie = {
+  id: string;
+  title: string;
+  year: number;
+  genre: string;
+  duration: string;
+  rating: string;
+  description: string;
+  tone: string;
+  featured?: boolean;
+};
+
+const movies: Movie[] = [
+  { id: "starfall", title: "Hành Trình Sao Rơi", year: 2026, genre: "Khoa học viễn tưởng", duration: "2 giờ 08 phút", rating: "T13", description: "Một tín hiệu bí ẩn ngoài rìa thiên hà mở ra hành trình khám phá giới hạn cuối cùng của con người.", tone: "cosmos", featured: true },
+  { id: "night-city", title: "Thành Phố Sau Nửa Đêm", year: 2025, genre: "Tâm lý · Giật gân", duration: "1 giờ 52 phút", rating: "T16", description: "Một phóng viên lần theo những manh mối kỳ lạ trong thành phố không bao giờ ngủ.", tone: "noir" },
+  { id: "last-land", title: "Vùng Đất Cuối Cùng", year: 2026, genre: "Phiêu lưu", duration: "2 giờ 01 phút", rating: "T13", description: "Nhóm thám hiểm tìm kiếm vùng đất chưa từng xuất hiện trên bất kỳ tấm bản đồ nào.", tone: "island" },
+  { id: "red-line", title: "Đường Ranh Đỏ", year: 2024, genre: "Hành động", duration: "1 giờ 46 phút", rating: "T18", description: "Một quyết định trong vài giây có thể thay đổi số phận của cả thành phố.", tone: "ember" },
+  { id: "blue-hour", title: "Khoảnh Khắc Xanh", year: 2025, genre: "Chính kịch", duration: "1 giờ 39 phút", rating: "K", description: "Cuộc gặp tình cờ đưa hai người xa lạ trở lại với những điều quan trọng nhất.", tone: "blue" },
+  { id: "little-orbit", title: "Vệ Tinh Nhỏ", year: 2026, genre: "Hoạt hình", duration: "1 giờ 28 phút", rating: "P", description: "Một chuyến phiêu lưu ấm áp qua những hành tinh đầy màu sắc.", tone: "orbit" },
+  { id: "deep-signal", title: "Tín Hiệu Vực Sâu", year: 2025, genre: "Bí ẩn", duration: "1 giờ 57 phút", rating: "T16", description: "Một đội nghiên cứu đại dương nhận được tín hiệu không thể giải thích từ đáy biển.", tone: "deep" },
+  { id: "paper-moon", title: "Mặt Trăng Giấy", year: 2024, genre: "Tình cảm", duration: "1 giờ 44 phút", rating: "T13", description: "Một câu chuyện nhẹ nhàng về ký ức, những lời hứa và cơ hội bắt đầu lại.", tone: "moon" },
 ];
-type Order = { id: string; createdAt: string; playerId: string; payment: "bank"; total: number; items: { id: string; name: string; game: string; quantity: number; unitPrice: number }[] };
-const CART_KEY = "gamehub.cart.v1";
-const ORDER_KEY = "gamehub.orders.v1";
-const money = (value: number) => new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(value);
+
+const categories = ["Tất cả", "Hành động", "Khoa học viễn tưởng", "Tâm lý · Giật gân", "Phiêu lưu", "Hoạt hình", "Chính kịch"];
+const navItems = ["Trang chủ", "Phim mới", "Thể loại", "Danh sách"];
 
 export default function HomePage() {
-  const [game, setGame] = useState<Game>("Tất cả");
   const [query, setQuery] = useState("");
-  const [cart, setCart] = useState<Record<string, number>>({});
-  const [ready, setReady] = useState(false);
-  const [cartOpen, setCartOpen] = useState(false);
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const [playerId, setPlayerId] = useState("");
-  const [notice, setNotice] = useState("");
-  const [chatOpen, setChatOpen] = useState(false);
+  const [category, setCategory] = useState("Tất cả");
+  const [selected, setSelected] = useState<Movie | null>(null);
+  const [saved, setSaved] = useState<string[]>([]);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(CART_KEY);
-      if (saved) {
-        const parsed: unknown = JSON.parse(saved);
-        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-          setCart(Object.fromEntries(Object.entries(parsed).filter(([id, qty]) => products.some(p => p.id === id) && Number.isInteger(qty) && Number(qty) > 0 && Number(qty) <= 99)) as Record<string, number>);
-        }
-      }
-    } catch { setCart({}); }
-    setReady(true);
-  }, []);
-  useEffect(() => {
-    if (ready) {
-      try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch { setNotice("Không thể lưu giỏ hàng trên thiết bị này."); }
-    }
-  }, [cart, ready]);
+  const visibleMovies = useMemo(() => movies.filter((movie) => {
+    const matchesCategory = category === "Tất cả" || movie.genre.toLowerCase().includes(category.toLowerCase());
+    const matchesQuery = (movie.title + " " + movie.genre + " " + movie.year).toLowerCase().includes(query.toLowerCase());
+    return matchesCategory && matchesQuery;
+  }), [category, query]);
 
-  const visible = useMemo(() => products.filter(p => (game === "Tất cả" || p.game === game) && `${p.name} ${p.game}`.toLowerCase().includes(query.toLowerCase())), [game, query]);
-  const items = products.filter(p => (cart[p.id] ?? 0) > 0);
-  const count = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
-  const total = items.reduce((sum, p) => sum + p.price * cart[p.id], 0);
-  function add(p: Product) {
-    setCart(current => ({ ...current, [p.id]: Math.min(99, (current[p.id] ?? 0) + 1) }));
-    setNotice(`Đã thêm ${p.name} vào giỏ hàng.`);
-  }
-  function quantity(id: string, delta: number) {
-    setCart(current => { const next = { ...current, [id]: Math.max(0, (current[id] ?? 0) + delta) }; if (!next[id]) delete next[id]; return next; });
-  }
-  function placeOrder() {
-    if (!playerId.trim()) { setNotice("Vui lòng nhập ID nhân vật hoặc thông tin nhận hàng."); return; }
-    const order: Order = { id: "SG-" + Date.now().toString(36).toUpperCase(), createdAt: new Date().toISOString(), playerId: playerId.trim(), payment: "bank", total, items: items.map(p => ({ id: p.id, name: p.name, game: p.game, quantity: cart[p.id], unitPrice: p.price })) };
-    try {
-      const saved = localStorage.getItem(ORDER_KEY);
-      const parsed: unknown = saved ? JSON.parse(saved) : [];
-      localStorage.setItem(ORDER_KEY, JSON.stringify([order, ...(Array.isArray(parsed) ? parsed : [])].slice(0, 50)));
-      setCart({}); localStorage.removeItem(CART_KEY); setCheckoutOpen(false); setCartOpen(false);
-      setNotice(`Đã lưu đơn xem trước ${order.id}. Chưa có thanh toán hoặc giao hàng thật.`);
-    } catch { setNotice("Không thể lưu đơn trên thiết bị này."); }
+  function toggleSaved(id: string) {
+    setSaved((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
   }
 
-  return <main className="shop-page">
-    <div className="top-notice"><Zap size={13} fill="currentColor" /> SHOPGAME STORE <span>•</span> DANH MỤC GAME & DỊCH VỤ</div>
-    <header className="mobile-header">
-      <button className="round-icon" onClick={() => setMenuOpen(v => !v)} aria-label="Mở menu"><Menu size={19}/></button>
-      <a className="shop-logo" href="#"><span>Shop</span>Game<span className="logo-dot">.</span></a>
-      <div className="header-actions">
-        <button className="round-icon" onClick={() => document.getElementById("product-search")?.focus()} aria-label="Tìm kiếm"><Search size={17}/></button>
-        <button className="round-icon" onClick={() => setCartOpen(true)} aria-label="Giỏ hàng"><ShoppingCart size={17}/></button>
-        <button className="round-icon notification" onClick={() => setNotice("Bạn chưa có thông báo mới.")} aria-label="Thông báo"><Bell size={17}/><i/></button>
-        <a className="round-icon" href="/account" aria-label="Tài khoản"><UserRound size={17}/></a>
-      </div>
-    </header>
-    {menuOpen && <nav className="mobile-menu"><a href="#home" onClick={() => setMenuOpen(false)}>Trang chủ</a><a href="#catalog" onClick={() => setMenuOpen(false)}>Cửa hàng</a><a href="/orders">Đơn hàng</a><a href="/account">Tài khoản</a></nav>}
-    <div className="ticker"><span>⚡</span> Thông tin sản phẩm rõ ràng <span>•</span> Hỗ trợ khách hàng</div>
+  return (
+    <main className="cinema-app">
+      <div className="cinema-topline"><Sparkles size={13} /> KHÔNG GIAN ĐIỆN ẢNH CỦA BẠN <span>•</span> THƯ VIỆN ĐANG PHÁT TRIỂN</div>
+      <header className="cinema-header">
+        <a className="cinema-brand" href="#home" aria-label="CineWave trang chủ"><span className="brand-mark"><Clapperboard size={19} /></span><span>Cine<span>Wave</span><i>.</i></span></a>
+        <nav className="cinema-nav" aria-label="Điều hướng chính">
+          {navItems.map((item, index) => <a key={item} className={index === 0 ? "active" : ""} href={index === 1 ? "#new" : index === 2 ? "#genres" : "#catalog"}>{item}</a>)}
+        </nav>
+        <div className="cinema-actions">
+          <label className="cinema-search"><Search size={16} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm phim..." aria-label="Tìm phim" /></label>
+          <a className="cinema-login" href="/login">Đăng nhập</a>
+          <button className="cinema-menu-button" onClick={() => setMenuOpen((value) => !value)} aria-label="Mở menu">{menuOpen ? <X size={20} /> : <Menu size={20} />}</button>
+        </div>
+      </header>
+      {menuOpen && <nav className="cinema-mobile-menu"><a href="#home" onClick={() => setMenuOpen(false)}>Trang chủ</a><a href="#new" onClick={() => setMenuOpen(false)}>Phim mới</a><a href="#genres" onClick={() => setMenuOpen(false)}>Thể loại</a><a href="#catalog" onClick={() => setMenuOpen(false)}>Danh sách phim</a><a href="/login">Đăng nhập</a></nav>}
 
-    <section className="hero-wrap" id="home">
-      <div className="hero-banner">
-        <div className="hero-shade"/>
-        <div className="hero-copy"><span className="hero-kicker">SHOPGAME STORE</span><h1>THẾ GIỚI<br/><em>GAME ONLINE</em></h1><p>Nạp game • Tài khoản • Vật phẩm</p><a href="#catalog">KHÁM PHÁ NGAY <ChevronRight size={15}/></a></div>
-        <div className="hero-artwork"><span className="hero-orb">✦</span><span className="hero-sword">⚔</span><span className="hero-fire">🔥</span></div>
-        <span className="hero-pagination">01 <i/> 03</span>
-      </div>
-      <div className="quick-links"><a href="#catalog"><span className="quick-icon cyan"><Wallet/></span><b>Nạp tiền</b></a><a href="#catalog"><span className="quick-icon violet"><Gamepad2/></span><b>Mua acc</b></a><a href="#trust"><span className="quick-icon orange"><ShieldCheck/></span><b>Uy tín</b></a><a href="#support"><span className="quick-icon blue"><CircleHelp/></span><b>Hỗ trợ</b></a></div>
-    </section>
+      <section className="cinema-hero" id="home">
+        <div className="hero-backdrop hero-cosmos" />
+        <div className="hero-grid" />
+        <div className="hero-content">
+          <div className="hero-eyebrow"><span className="live-dot" /> PHIM NỔI BẬT <span className="hero-divider" /> GIỚI THIỆU</div>
+          <h1>Hành Trình<br /><em>Sao Rơi</em></h1>
+          <div className="hero-meta"><span>2026</span><span>·</span><span>Khoa học viễn tưởng</span><span>·</span><span>2 giờ 08 phút</span><span className="age-tag">T13</span></div>
+          <p>Một tín hiệu bí ẩn ngoài rìa thiên hà mở ra hành trình khám phá giới hạn cuối cùng của con người.</p>
+          <div className="hero-buttons"><button className="primary-play" onClick={() => setSelected(movies[0])}><Play size={17} fill="currentColor" /> Khám phá phim</button><button className="secondary-info" onClick={() => setSelected(movies[0])}>Thông tin phim <ArrowRight size={16} /></button></div>
+          <div className="hero-footnote"><ShieldCheck size={14} /> Nội dung giới thiệu mẫu · chưa cung cấp luồng phát</div>
+        </div>
+        <div className="hero-art"><div className="planet planet-one" /><div className="planet planet-two" /><div className="orbit orbit-one" /><div className="orbit orbit-two" /><span className="hero-star star-one">✦</span><span className="hero-star star-two">✧</span><span className="hero-art-label">CINEWAVE / ORIGINAL CONCEPT</span></div>
+        <div className="hero-pagination"><span>01</span><i /><span>04</span></div>
+      </section>
 
-    <section className="service-notes">
-      <article><span className="service-icon green"><ShieldCheck size={20}/></span><div><b>Hỗ trợ khách hàng ShopGame</b><small>Tiếp nhận câu hỏi và hỗ trợ đơn hàng</small></div><span className="service-arrow">›</span></article>
-      <article><span className="service-icon purple"><Wallet size={20}/></span><div><b>Thông tin hỗ trợ</b><small>Lịch hỗ trợ chính thức sẽ được cập nhật tại đây</small></div><span className="service-arrow">›</span></article>
-      <article><span className="service-icon orange"><Package size={20}/></span><div><b>Thông tin sản phẩm</b><small>Vui lòng xác nhận giá và tình trạng trước khi giao dịch</small></div><span className="service-arrow">›</span></article>
-    </section>
+      <section className="cinema-benefits">
+        <div><span className="benefit-icon"><Film size={18} /></span><span><b>Khám phá phim</b><small>Danh mục được tuyển chọn</small></span></div>
+        <div><span className="benefit-icon"><Bookmark size={18} /></span><span><b>Lưu phim yêu thích</b><small>Danh sách lưu trên thiết bị</small></span></div>
+        <div><span className="benefit-icon"><ShieldCheck size={18} /></span><span><b>Nội dung minh bạch</b><small>Chỉ phát nội dung có quyền</small></span></div>
+      </section>
 
-    <section className="catalog-section" id="catalog">
-      <div className="section-title"><div><span className="section-kicker">SHOPGAME MARKET</span><h2>Kho acc <em>{game === "Tất cả" ? "game" : game}</em></h2></div><a href="#catalog">Xem tất cả <ChevronRight size={14}/></a></div>
-      <div className="game-tabs">{(["Tất cả","Liên Quân","Free Fire","PUBG Mobile"] as Game[]).map(g => <button key={g} className={game === g ? "active" : ""} onClick={() => setGame(g)}>{g}</button>)}</div>
-      <label className="catalog-search"><Search size={16}/><input id="product-search" value={query} onChange={e => setQuery(e.target.value)} placeholder="Tìm kiếm sản phẩm..."/><span>/</span></label>
-      <p className="catalog-disclaimer">Danh sách sản phẩm và giá hiện là dữ liệu minh họa, chưa phải hàng tồn kho hoặc báo giá giao dịch thật.</p>
-      <div className="product-grid">{visible.map((p) => <article className="game-product" key={p.id}>
-        <div className={`product-cover ${p.tone}`}><span className="cover-pattern"/><span className="cover-game">{p.game}</span><span className="cover-emoji">{p.icon}</span><span className="cover-caption">SHOPGAME · DIGITAL</span></div>
-        <div className="product-body"><h3>{p.name}</h3><div className="product-stats"><span>Danh mục: <b>Tài khoản game</b></span><span>Trạng thái: <b>Sản phẩm mẫu</b></span></div><div className="product-price"><strong>{money(p.price)}</strong></div><button className="view-product" onClick={() => add(p)}>Thêm vào giỏ <ChevronRight size={14}/></button></div>
-      </article>)}</div>
-      {visible.length === 0 && <div className="no-products">Không tìm thấy sản phẩm. <button onClick={() => {setQuery("");setGame("Tất cả");}}>Xóa bộ lọc</button></div>}
-      <button className="load-more" onClick={() => setNotice("Bạn đang xem toàn bộ sản phẩm hiện có.")}>Xem thêm <ChevronDown size={15}/></button>
-    </section>
+      <section className="cinema-section" id="new">
+        <div className="cinema-section-heading"><div><span className="section-overline">CINEWAVE SELECTION</span><h2>Phim <em>được đề xuất</em></h2></div><a href="#catalog">Khám phá thư viện <ArrowRight size={15} /></a></div>
+        <div className="featured-strip">
+          {movies.filter((movie) => movie.featured || movie.id === "night-city" || movie.id === "last-land").map((movie) => <button className={"featured-card poster-" + movie.tone} key={movie.id} onClick={() => setSelected(movie)}><span className="featured-art"><span className="poster-symbol">{movie.id === "starfall" ? "✦" : movie.id === "night-city" ? "夜" : "⌁"}</span><span className="poster-index">CW / 0{movies.indexOf(movie) + 1}</span></span><span className="featured-info"><b>{movie.title}</b><small>{movie.year} <i>·</i> {movie.genre}</small></span></button>)}
+        </div>
+      </section>
 
-    <section className="trust-section" id="trust"><div className="section-title"><div><span className="section-kicker">SHOPGAME COMMITMENT</span><h2>Uy tín <em>của shop</em></h2></div></div><div className="trust-video"><div className="video-thumb"><span className="play-button">▶</span><b>SHOP GAME UY TÍN KHÔNG AE?</b><small>VIDEO GIỚI THIỆU SHOPGAME</small></div><p>Cam kết thông tin rõ ràng, hỗ trợ khách hàng trong suốt quá trình đặt hàng.</p></div></section>
+      <section className="cinema-section catalog-section" id="catalog">
+        <div className="cinema-section-heading"><div><span className="section-overline">EXPLORE THE LIBRARY</span><h2>Thư viện <em>điện ảnh</em></h2></div><span className="catalog-count">{visibleMovies.length} PHIM MẪU</span></div>
+        <div className="genre-pills" id="genres">{categories.map((item) => <button key={item} className={category === item ? "selected" : ""} onClick={() => setCategory(item)}>{item}</button>)}</div>
+        {query && <div className="search-result">Kết quả tìm kiếm cho “{query}” <button onClick={() => setQuery("")}>Xóa <X size={13} /></button></div>}
+        <div className="movie-grid">{visibleMovies.map((movie, index) => <article className="movie-card" key={movie.id}>
+          <button className={"movie-poster poster-" + movie.tone} onClick={() => setSelected(movie)} aria-label={"Xem thông tin " + movie.title}>
+            <span className="poster-symbol">{["✦", "夜", "⌁", "◈", "◌", "✧", "≈", "☾"][index % 8]}</span><span className="poster-brand">CINEWAVE</span><span className="poster-bottom"><span>{movie.genre}</span><b>{movie.rating}</b></span><span className="poster-hover"><Play size={22} fill="currentColor" /></span>
+          </button>
+          <div className="movie-card-info"><div><h3>{movie.title}</h3><p>{movie.year} <span>·</span> {movie.duration}</p></div><button className={"save-movie " + (saved.includes(movie.id) ? "is-saved" : "")} onClick={() => toggleSaved(movie.id)} aria-label={saved.includes(movie.id) ? "Bỏ lưu phim" : "Lưu phim"}>{saved.includes(movie.id) ? <Check size={16} /> : <Bookmark size={16} />}</button></div>
+        </article>)}</div>
+        {visibleMovies.length === 0 && <div className="empty-movies"><Film size={28} /><b>Chưa tìm thấy phim phù hợp</b><span>Thử từ khóa hoặc thể loại khác.</span><button onClick={() => { setQuery(""); setCategory("Tất cả"); }}>Đặt lại bộ lọc</button></div>}
+        <p className="movie-disclaimer">Thư viện hiện sử dụng dữ liệu minh họa và artwork đồ họa tự tạo. Chưa có phim bản quyền, tập phim hoặc nguồn phát được tích hợp.</p>
+      </section>
 
-    <section className="support-section" id="support"><div className="section-title"><div><span className="section-kicker">HELP CENTER</span><h2>Câu hỏi <em>thường gặp</em></h2></div></div>{["Mua acc game tại ShopGame có tự động không?","Nạp tiền vào ShopGame có được khuyến mãi không?","Sau khi mua tôi xem lại thông tin ở đâu?","Shop có hỗ trợ nếu gặp vấn đề không?"].map((q)=><details className="faq" key={q}><summary>{q}<ChevronDown size={16}/></summary><p>ShopGame đang ở phiên bản xem trước. Vui lòng liên hệ hỗ trợ để được hướng dẫn; không gửi mật khẩu tài khoản game.</p></details>)}</section>
+      <section className="cinema-callout"><div className="callout-icon"><Clapperboard size={23} /></div><div><span className="section-overline">YOUR NEXT WATCH</span><h2>Một thế giới phim đang chờ bạn.</h2><p>CineWave đang được xây dựng từng bước. Các tính năng xem phim sẽ chỉ mở khi nguồn nội dung hợp pháp sẵn sàng.</p></div><a href="#catalog">Khám phá phim <ArrowRight size={15} /></a></section>
 
-    <section className="hotline-card"><div className="hotline-heading"><span>☎</span><div><small>HỖ TRỢ SHOPGAME</small><strong>Hỗ trợ khách hàng</strong><small>Tiếp nhận yêu cầu hỗ trợ</small></div></div><div className="hotline-row"><span>◷</span><div><b>Lịch hỗ trợ</b><small>Đang cập nhật thông tin chính thức</small></div></div><a href="#support">Liên hệ hỗ trợ <ChevronRight size={14}/></a></section>
+      <footer className="cinema-footer"><a className="cinema-brand" href="#home"><span className="brand-mark"><Clapperboard size={18} /></span><span>Cine<span>Wave</span><i>.</i></span></a><p>© 2026 CineWave. Nền tảng khám phá điện ảnh đang trong giai đoạn phát triển.</p><div><a href="#home">Trang chủ</a><a href="#catalog">Thư viện</a><a href="/login">Tài khoản</a></div></footer>
 
-    <footer className="shop-footer"><a className="shop-logo" href="#">ShopGame<span className="logo-dot">.</span></a><p>© 2026 ShopGame. Nền tảng độc lập, không liên kết chính thức với nhà phát hành game.</p><div className="footer-social">f　◎　𝕏　▶</div></footer>
+      <nav className="cinema-bottom-nav"><a className="current" href="#home"><Film size={18} /><span>Khám phá</span></a><a href="#new"><Sparkles size={18} /><span>Phim mới</span></a><a href="#genres"><Clapperboard size={18} /><span>Thể loại</span></a><a href="/login"><Bookmark size={18} /><span>Đã lưu</span></a></nav>
 
-    <nav className="bottom-nav"><a className="selected" href="#home"><Home/><span>Home</span></a><a href="#catalog"><Grid3X3/><span>Menu</span></a><a href="#trust"><ShieldCheck/><span>Uy tín</span></a><a href="#catalog"><Wallet/><span>Nạp tiền</span></a><a href="/account"><UserRound/><span>Tài khoản</span></a></nav>
-    <button className="chat-fab" onClick={() => setChatOpen(v => !v)} aria-label="Chat hỗ trợ"><MessageCircle size={24}/></button>
-    {chatOpen && <div className="chat-popover"><div><b>ShopGame hỗ trợ</b><button onClick={() => setChatOpen(false)}><X size={15}/></button></div><p>Xin chào! Bạn cần hỗ trợ về sản phẩm hoặc đơn hàng?</p><a href="#support">Xem câu hỏi thường gặp <ChevronRight size={14}/></a></div>}
-    <button className="back-top" onClick={() => window.scrollTo({top:0,behavior:"smooth"})}>↑</button>
-
-    {notice && <div className="notice-toast" role="status">{notice}<button onClick={() => setNotice("")}><X size={16}/></button></div>}
-    {cartOpen && <div className="modal-backdrop" onMouseDown={e => {if(e.target===e.currentTarget)setCartOpen(false);}}><aside className="cart-drawer"><div className="drawer-title"><div><small>SHOPGAME</small><h2>Giỏ hàng ({count})</h2></div><button onClick={() => setCartOpen(false)}><X/></button></div>{items.length===0?<div className="cart-empty"><ShoppingCart size={36}/><b>Giỏ hàng đang trống</b><p>Chọn sản phẩm để thêm vào giỏ.</p></div>:<><div className="cart-lines">{items.map(p=><div className="cart-line" key={p.id}><span>{p.icon}</span><div><b>{p.name}</b><small>{money(p.price)}</small><div className="qty-controls"><button onClick={()=>quantity(p.id,-1)}>−</button>{cart[p.id]}<button onClick={()=>quantity(p.id,1)}>+</button></div></div><strong>{money(p.price*cart[p.id])}</strong></div>)}</div><div className="cart-total"><span>Tổng cộng</span><b>{money(total)}</b></div><button className="checkout-button" onClick={()=>{setCartOpen(false);setCheckoutOpen(true);}}>Tiếp tục đặt hàng</button><p className="demo-disclaimer">Bản xem trước: chưa thu tiền hoặc giao hàng thật.</p></>}</aside></div>}
-    {checkoutOpen && <div className="modal-backdrop" onMouseDown={e => {if(e.target===e.currentTarget)setCheckoutOpen(false);}}><section className="checkout-box"><div className="drawer-title"><div><small>CHECKOUT PREVIEW</small><h2>Thông tin nhận hàng</h2></div><button onClick={()=>setCheckoutOpen(false)}><X/></button></div><label className="checkout-label">ID nhân vật / thông tin nhận hàng<input value={playerId} onChange={e=>setPlayerId(e.target.value)} placeholder="Không nhập mật khẩu game"/></label><div className="cart-total"><span>Tổng đơn</span><b>{money(total)}</b></div><button className="checkout-button" onClick={placeOrder}>Lưu đơn xem trước</button><p className="demo-disclaimer">Đơn chỉ lưu trên thiết bị này. Chưa tích hợp thanh toán và giao hàng thật.</p></section></div>}
-  </main>;
+      {selected && <div className="movie-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelected(null); }}><section className="movie-modal" role="dialog" aria-modal="true" aria-label={"Thông tin phim " + selected.title}><button className="modal-close" onClick={() => setSelected(null)} aria-label="Đóng"><X size={19} /></button><div className={"modal-art poster-" + selected.tone}><span className="poster-symbol">✦</span><span className="poster-brand">CINEWAVE / FEATURE</span></div><div className="modal-copy"><span className="section-overline">MOVIE PREVIEW</span><h2>{selected.title}</h2><div className="hero-meta"><span>{selected.year}</span><span>·</span><span>{selected.genre}</span><span>·</span><span>{selected.duration}</span><span className="age-tag">{selected.rating}</span></div><p>{selected.description}</p><div className="modal-notice"><Clock3 size={16} /> Thông tin mẫu. Trang chi tiết và trình phát sẽ được triển khai ở giai đoạn tiếp theo.</div><button className="primary-play" onClick={() => toggleSaved(selected.id)}>{saved.includes(selected.id) ? <Check size={16} /> : <Bookmark size={16} />} {saved.includes(selected.id) ? "Đã lưu vào danh sách" : "Lưu phim yêu thích"}</button></div></section></div>}
+    </main>
+  );
 }
